@@ -1678,14 +1678,20 @@ function fadeIn(audioEl, targetVolume, duration=400){
   if (!audioEl) return;
   const startTime = performance.now();
   audioEl.volume = 0;
+  audioEl.muted = false; // Ensure not muted at start
   
   function updateVolume() {
     const elapsed = performance.now() - startTime;
     const progress = Math.min(elapsed / duration, 1);
     audioEl.volume = Math.min(targetVolume, targetVolume * progress);
+    audioEl.muted = false; // Ensure not muted during fade
     
     if (progress < 1) {
       requestAnimationFrame(updateVolume);
+    } else {
+      // Final check: ensure volume and mute state are correct after fade completes
+      audioEl.volume = targetVolume;
+      audioEl.muted = false;
     }
   }
   requestAnimationFrame(updateVolume);
@@ -3499,15 +3505,34 @@ function startSnakeGame() {
   
   // Touch/swipe controls - work anywhere on screen when snake game is active
   let touchStartX = 0, touchStartY = 0;
+  let touchStartTime = 0;
+  
   const handleTouchStart = (e) => {
+    // Only process if snake game is active
     if (snakeGameContainer.style.display !== 'block' || !gameActive) return;
+    
+    // Don't prevent default on other elements (like buttons)
+    const target = e.target;
+    if (target && (target.tagName === 'BUTTON' || target.closest('button'))) {
+      return; // Allow button clicks to work normally
+    }
+    
     e.preventDefault();
     touchStartX = e.touches[0].clientX;
     touchStartY = e.touches[0].clientY;
+    touchStartTime = Date.now();
   };
   
   const handleTouchEnd = (e) => {
+    // Only process if snake game is active
     if (snakeGameContainer.style.display !== 'block' || !gameActive) return;
+    
+    // Don't prevent default on other elements
+    const target = e.target;
+    if (target && (target.tagName === 'BUTTON' || target.closest('button'))) {
+      return; // Allow button clicks to work normally
+    }
+    
     e.preventDefault();
     if (!touchStartX || !touchStartY) return;
     
@@ -3517,13 +3542,14 @@ function startSnakeGame() {
     const dy_touch = touchEndY - touchStartY;
     const minSwipe = 30;
     
-    if (Math.abs(dx_touch) > Math.abs(dy_touch)) {
-      if (Math.abs(dx_touch) > minSwipe) {
+    // Only process if it's a swipe (not a tap)
+    if (Math.abs(dx_touch) > minSwipe || Math.abs(dy_touch) > minSwipe) {
+      if (Math.abs(dx_touch) > Math.abs(dy_touch)) {
+        // Horizontal swipe
         if (dx_touch > 0 && dx !== -1) { dx = 1; dy = 0; }
         else if (dx_touch < 0 && dx !== 1) { dx = -1; dy = 0; }
-      }
-    } else {
-      if (Math.abs(dy_touch) > minSwipe) {
+      } else {
+        // Vertical swipe
         if (dy_touch < 0 && dy !== 1) { dx = 0; dy = -1; }
         else if (dy_touch > 0 && dy !== -1) { dx = 0; dy = 1; }
       }
@@ -3531,9 +3557,10 @@ function startSnakeGame() {
     
     touchStartX = 0;
     touchStartY = 0;
+    touchStartTime = 0;
   };
   
-  // Attach to document body so controls work anywhere on screen
+  // Attach to document body so controls work anywhere on screen (not just the game box)
   document.body.addEventListener('touchstart', handleTouchStart, { passive: false });
   document.body.addEventListener('touchend', handleTouchEnd, { passive: false });
   
@@ -3624,6 +3651,39 @@ const typewriterText = document.getElementById('typewriterText');
 const cherryAudio = document.getElementById('cherryAudio');
 const champagnecoastAudio = document.getElementById('champagnecoastAudio');
 
+// Unlock audio context for mobile (call this when user interacts)
+function unlockAudioContext() {
+  if (cherryAudio) {
+    // Create a silent audio context unlock
+    const unlock = () => {
+      cherryAudio.volume = 0.01;
+      cherryAudio.muted = false; // Ensure not muted
+      cherryAudio.play().then(() => {
+        cherryAudio.pause();
+        cherryAudio.currentTime = 0;
+        cherryAudio.volume = 1.0; // Set to max volume
+        cherryAudio.muted = false; // Ensure not muted
+        console.log('Audio context unlocked, volume:', cherryAudio.volume, 'muted:', cherryAudio.muted);
+      }).catch(() => {});
+    };
+    unlock();
+  }
+}
+
+// Unlock audio on any user interaction (for mobile compatibility)
+let audioUnlocked = false;
+const unlockAudioOnInteraction = () => {
+  if (!audioUnlocked) {
+    unlockAudioContext();
+    audioUnlocked = true;
+    // Remove listeners after first unlock
+    document.removeEventListener('touchstart', unlockAudioOnInteraction);
+    document.removeEventListener('click', unlockAudioOnInteraction);
+  }
+};
+document.addEventListener('touchstart', unlockAudioOnInteraction, { once: true });
+document.addEventListener('click', unlockAudioOnInteraction, { once: true });
+
 function startCelebrationSequence() {
   // Hide all game containers and show main menu
   quizContainer.style.display = 'none';
@@ -3634,6 +3694,11 @@ function startCelebrationSequence() {
   backButton.style.display = 'none';
   dimOverlay.style.display = 'none';
   psycheOverlay.classList.remove('show');
+  
+  // Ensure audio context is unlocked for mobile (user has interacted by completing games)
+  if (cherryAudio) {
+    unlockAudioContext();
+  }
   
   // Show main menu with all games completed
   boxContainer.style.display = 'grid';
@@ -3657,26 +3722,74 @@ function startCelebrationSequence() {
       
       // When screen is black, play cherry.mp3 audio (mobile compatible)
       cherryAudio.currentTime = 0;
-      cherryAudio.volume = 0.9;
+      cherryAudio.volume = 1.0; // Set to max volume
+      cherryAudio.muted = false; // Ensure not muted
       cherryAudio.loop = true;
+      
       // For mobile: ensure audio context is active and play with proper handling
+      // Mobile browsers require user interaction, but since user completed games, we should be able to play
       const playCherryAudio = () => {
-        const playPromise = cherryAudio.play();
-        if (playPromise !== undefined) {
-          playPromise.then(() => {
-            console.log('Cherry audio playing');
-          }).catch((error) => {
-            console.log('Cherry audio autoplay prevented, retrying...');
-            // Retry after a short delay
-            setTimeout(() => {
-              cherryAudio.play().catch(() => {
-                console.log('Cherry audio play failed');
-              });
-            }, 100);
-          });
-        }
+        // Ensure audio is loaded and volume is set
+        cherryAudio.load();
+        cherryAudio.volume = 1.0; // Set volume again after load
+        cherryAudio.muted = false; // Ensure not muted
+        
+        // Try to play with multiple retry attempts for mobile
+        let retryCount = 0;
+        const maxRetries = 5;
+        
+        const attemptPlay = () => {
+          // Ensure volume and mute state before each attempt
+          cherryAudio.volume = 1.0;
+          cherryAudio.muted = false;
+          
+          const playPromise = cherryAudio.play();
+          if (playPromise !== undefined) {
+            playPromise.then(() => {
+              // Double-check volume after playing starts
+              cherryAudio.volume = 1.0;
+              cherryAudio.muted = false;
+              console.log('Cherry audio playing successfully at volume:', cherryAudio.volume, 'muted:', cherryAudio.muted);
+            }).catch((error) => {
+              console.log(`Cherry audio autoplay prevented (attempt ${retryCount + 1}/${maxRetries})`);
+              retryCount++;
+              if (retryCount < maxRetries) {
+                // Try with a longer delay for mobile browsers
+                setTimeout(() => {
+                  attemptPlay();
+                }, 200 * retryCount); // Increasing delay
+              } else {
+                // Last resort: try with a click event simulation (user has already interacted)
+                console.log('Final attempt: using user interaction context');
+                // Since user has interacted, try one more time
+                setTimeout(() => {
+                  cherryAudio.volume = 1.0;
+                  cherryAudio.muted = false;
+                  cherryAudio.play().then(() => {
+                    cherryAudio.volume = 1.0;
+                    cherryAudio.muted = false;
+                  }).catch(() => {
+                    console.log('Cherry audio play failed after all attempts');
+                  });
+                }, 500);
+              }
+            });
+          } else {
+            // Fallback for older browsers
+            cherryAudio.volume = 1.0;
+            cherryAudio.muted = false;
+            cherryAudio.play();
+          }
+        };
+        
+        // Start playing
+        attemptPlay();
       };
-      playCherryAudio();
+      
+      // Small delay to ensure overlay is fully visible (helps with mobile audio context)
+      setTimeout(() => {
+        playCherryAudio();
+      }, 100);
       
       // Start fireworks video immediately after audio starts - optimized for highest quality
       fireworksVideo.currentTime = 0;
@@ -3819,17 +3932,21 @@ function startEssayFakeout() {
       if (cherryAudio.paused || cherryAudio.volume < 0.5) {
         cherryAudio.currentTime = 0;
         cherryAudio.volume = 0;
+        cherryAudio.muted = false; // Ensure not muted
         cherryAudio.loop = true;
         // Mobile compatible audio play
         const playPromise = cherryAudio.play();
         if (playPromise !== undefined) {
           playPromise.then(() => {
-            fadeIn(cherryAudio, 0.9, 1000);
+            cherryAudio.muted = false; // Ensure not muted after play starts
+            fadeIn(cherryAudio, 1.0, 1000); // Fade to max volume (1.0)
           }).catch((error) => {
             console.log('Cherry audio autoplay prevented, retrying...');
             setTimeout(() => {
+              cherryAudio.muted = false;
               cherryAudio.play().then(() => {
-                fadeIn(cherryAudio, 0.9, 1000);
+                cherryAudio.muted = false;
+                fadeIn(cherryAudio, 1.0, 1000); // Fade to max volume
               }).catch(() => {
                 console.log('Cherry audio play failed');
               });
