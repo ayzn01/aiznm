@@ -67,7 +67,7 @@
   }
   
   /* Performance optimizations - Only apply GPU acceleration where needed */
-  .gameBox, #backButton, #skipButton, #startButton, .quizOption {
+  .gameBox, #backButton, #startButton, .quizOption {
     contain: layout style paint;
   }
   
@@ -972,63 +972,6 @@
   @keyframes fadeInChar {
     to { opacity: 1; }
   }
-  /* Skip button */
-  #skipButton{
-    position:fixed !important; 
-    top:max(20px, env(safe-area-inset-top, 20px)) !important; 
-    right:max(20px, env(safe-area-inset-right, 20px)) !important;
-    left:auto !important;
-    z-index:2000 !important;
-    padding:10px 20px; background:rgba(255,255,255,0.08);
-    backdrop-filter: blur(10px) saturate(140%);
-    -webkit-backdrop-filter: blur(10px) saturate(140%);
-    border:1px solid rgba(255,255,255,0.14);
-    border-radius:12px; color:#fff; cursor:pointer;
-    font-size:12px; font-weight:600; 
-    transition: transform 0.2s ease-out, background 0.2s ease-out, box-shadow 0.2s ease-out;
-    display:block !important; /* Always visible */
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.1);
-    position: relative;
-    overflow: visible;
-    -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
-    contain: layout style paint;
-  }
-  /* Purple glow effect */
-  #skipButton::before {
-    content: "";
-    background: linear-gradient(
-      45deg,
-      #7b2ff7, #9b59b6, #a463f2, #8e44ad,
-      #7b2ff7, #9b59b6, #a463f2, #7b2ff7
-    );
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    background-size: 600%;
-    z-index: -1;
-    width: calc(100% + 4px);
-    height: calc(100% + 4px);
-    filter: blur(8px);
-    animation: glowingPurple 20s linear infinite;
-    transition: opacity .3s ease-in-out;
-    border-radius: 10px;
-    opacity: 0;
-  }
-  #skipButton:hover::before {
-    opacity: 1;
-  }
-  #skipButton:hover,
-  #skipButton:active{ 
-    background:rgba(255,255,255,0.12); 
-    transform:scale(1.05);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.25), 0 0 15px rgba(255,255,255,0.15), inset 0 1px 0 rgba(255,255,255,0.2);
-    border-color: rgba(255,255,255,0.25);
-  }
-  #skipButton:focus {
-    outline: 2px solid rgba(255,255,255,0.3);
-    outline-offset: 2px;
-  }
 
   /* Mobile-first responsive design - comprehensive breakpoints */
   
@@ -1093,7 +1036,7 @@
       padding:12px 40px; 
       font-size:16px; 
     }
-    #backButton, #skipButton{
+    #backButton{
       width:40px;
       height:40px;
     }
@@ -1186,7 +1129,7 @@
       font-size:clamp(15px, 3.5vw, 18px);
       min-height: 70px;
     }
-    #backButton, #skipButton{
+    #backButton{
       width:38px;
       height:38px;
       font-size:11px;
@@ -1231,12 +1174,11 @@
       padding:10px 28px;
       font-size:14px;
     }
-    #backButton, #skipButton{
+    #backButton{
       width:36px;
       height:36px;
       top:10px;
       left:10px;
-      right:10px;
     }
     #finalPageContent{
       padding:clamp(12px, 3vw, 20px);
@@ -1339,10 +1281,6 @@
       top: max(12px, env(safe-area-inset-top, 12px));
       left: max(12px, env(safe-area-inset-left, 12px));
     }
-    #skipButton{
-      top: max(20px, env(safe-area-inset-top, 20px));
-      right: max(20px, env(safe-area-inset-right, 20px));
-    }
     #snakeGameScore{
       top: max(15px, env(safe-area-inset-top, 15px));
       right: max(15px, env(safe-area-inset-right, 15px));
@@ -1371,7 +1309,7 @@
   
   /* Touch-friendly tap targets */
   @media (hover: none) and (pointer: coarse) {
-    .gameBox, .quizOption, #startButton, #backButton, #skipButton, #finalPageButton{
+    .gameBox, .quizOption, #startButton, #backButton, #finalPageButton{
       min-height: 44px;
       min-width: 44px;
     }
@@ -1407,8 +1345,6 @@
   <!-- BACK -->
   <div id="backButton" title="Back to menu" aria-label="Back to menu"></div>
   
-  <!-- SKIP BUTTON (for testing) -->
-  <button id="skipButton" title="Skip to final part">Skip to Final Part</button>
 
   <!-- MAIN SCREEN (hidden until after start) -->
   <div id="mainScreen" aria-hidden="true">
@@ -1556,7 +1492,6 @@ const snakeGameCanvas = document.getElementById('snakeGameCanvas');
 const snakeGameScore = document.getElementById('snakeGameScore');
 
 const backButton = document.getElementById('backButton');
-const skipButton = document.getElementById('skipButton');
 
 const clairdeluneAudio = document.getElementById('clairdeluneAudio');
 const psycheAudio = document.getElementById('psycheAudio');
@@ -3842,7 +3777,6 @@ function startTypewriterSequence() {
           // Hide main menu IMMEDIATELY before transition
           boxContainer.style.display = 'none';
           mainScreen.classList.remove('visible');
-          skipButton.style.display = 'none';
           
           // Start essay fakeout
           startEssayFakeout();
@@ -3871,7 +3805,6 @@ function startTypewriterSequence() {
             // Hide main menu IMMEDIATELY before transition
             boxContainer.style.display = 'none';
             mainScreen.classList.remove('visible');
-            skipButton.style.display = 'none';
             
             // Start essay fakeout with audio fade in
             startEssayFakeout();
@@ -3904,7 +3837,6 @@ function startEssayFakeout() {
   // Hide main menu and all game elements
   boxContainer.style.display = 'none';
   mainScreen.classList.remove('visible');
-  skipButton.style.display = 'none';
   backButton.style.display = 'none';
   quizContainer.style.display = 'none';
   puzzleContainer.style.display = 'none';
@@ -4232,39 +4164,6 @@ function startEssayFakeout() {
     finalPageButtonHandler();
   }, { passive: false });
   
-  // Skip button functionality (for testing)
-  skipButton.addEventListener('click', () => {
-    // Mark all games as completed
-    ['game1', 'game2', 'game3', 'game4'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el && !el.classList.contains('completed')) {
-        el.classList.add('completed');
-      }
-    });
-    
-    // Hide all game containers
-    quizContainer.style.display = 'none';
-    puzzleContainer.style.display = 'none';
-    crossyGameContainer.style.display = 'none';
-    snakeGameContainer.style.display = 'none';
-    snakeGameScore.style.display = 'none';
-    backButton.style.display = 'none';
-    dimOverlay.style.display = 'none';
-    psycheOverlay.classList.remove('show');
-    
-    // Show main menu
-    boxContainer.style.display = 'grid';
-    boxContainer.style.opacity = 1;
-    mainScreen.classList.add('visible');
-    
-    // Ensure skip button is visible
-    skipButton.style.display = 'block';
-    
-    // Wait 2 seconds then trigger celebration (changed from 5 seconds)
-    setTimeout(() => {
-      startCelebrationSequence();
-    }, 2000);
-  });
 })();
 </script>
 </body>
