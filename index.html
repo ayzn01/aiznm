@@ -1401,7 +1401,7 @@
   <audio id="kanyeAudio" src="kanye.mp3" preload="auto"></audio>
   <audio id="mariogame3Audio" src="mariogame3.mp3" preload="auto"></audio>
   <audio id="game1CompletionAudio" src="saikiOST.mp3" preload="auto"></audio>
-  <audio id="cherryAudio" src="cherry.mp3" preload="auto" loop></audio>
+  <audio id="cherryAudio" src="cherry.mp3" preload="none" loop></audio>
   <audio id="champagnecoastAudio" src="champagnecoast.mp3" preload="auto" loop></audio>
   
   <!-- CELEBRATION SEQUENCE -->
@@ -3587,22 +3587,35 @@ const cherryAudio = document.getElementById('cherryAudio');
 const champagnecoastAudio = document.getElementById('champagnecoastAudio');
 
 // Unlock audio context for mobile (call this when user interacts)
+// Use Web Audio API directly instead of cherryAudio to avoid playing it prematurely
 function unlockAudioContext() {
-  if (cherryAudio) {
-    // Create a silent audio context unlock
-    const unlock = () => {
-      cherryAudio.volume = 0.01;
-      cherryAudio.muted = false; // Ensure not muted
-      cherryAudio.play().then(() => {
-        cherryAudio.pause();
-        cherryAudio.currentTime = 0;
-        cherryAudio.volume = 1.0; // Set to max volume
-        cherryAudio.muted = false; // Ensure not muted
-        console.log('Audio context unlocked, volume:', cherryAudio.volume, 'muted:', cherryAudio.muted);
-      }).catch(() => {});
-    };
-    unlock();
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContext) {
+    console.log('Web Audio API not supported');
+    return;
   }
+
+  const context = new AudioContext();
+
+  // Check if context is already running
+  if (context.state === 'running') {
+    context.close(); // Close if already running to avoid multiple contexts
+    return;
+  }
+
+  const unlock = () => {
+    if (context.state === 'suspended') {
+      context.resume().then(() => {
+        console.log('AudioContext resumed successfully');
+        context.close(); // Close context after resuming to free resources
+      }).catch(e => console.error('Error resuming AudioContext:', e));
+    } else if (context.state === 'running') {
+      console.log('AudioContext already running');
+      context.close(); // Close if already running
+    }
+  };
+
+  unlock();
 }
 
 // Unlock audio on any user interaction (for mobile compatibility)
@@ -3866,6 +3879,8 @@ function startEssayFakeout() {
         cherryAudio.volume = 0;
         cherryAudio.muted = false; // Ensure not muted
         cherryAudio.loop = true;
+        // Load audio before playing (since preload="none")
+        cherryAudio.load();
         // Mobile compatible audio play
         const playPromise = cherryAudio.play();
         if (playPromise !== undefined) {
@@ -4029,6 +4044,15 @@ function startEssayFakeout() {
   document.getElementById('finalPageButton').style.display = 'none';
   // Hide final page
   document.getElementById('finalPage').style.display = 'none';
+  
+  // Explicitly pause and reset cherryAudio on page load to prevent it from playing
+  if (cherryAudio) {
+    cherryAudio.pause();
+    cherryAudio.currentTime = 0;
+    cherryAudio.volume = 0;
+    cherryAudio.muted = false;
+    cherryAudio.loop = false; // Don't loop until we explicitly set it
+  }
   
   // Initialize fluid shape containers (hidden - using gradient backgrounds now)
   const startFluids = document.getElementById('fluidShapesContainer');
