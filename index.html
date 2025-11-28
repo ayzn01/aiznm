@@ -1,0 +1,4054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="mobile-web-app-capable" content="yes" />
+<title>aiznm</title>
+<style>
+  /* local fonts */
+  @font-face { font-family:'Coolvetica'; src:url('Coolvetica.ttf') format('truetype'); }
+  @font-face { font-family:'Lemon Milk'; src:url('Lemon Milk.otf') format('opentype'), url('Lemon Milk.ttf') format('truetype'); }
+
+  :root{
+    --glass-bg: rgba(255,255,255,0.06);
+    --glass-border: rgba(255,255,255,0.18);
+    --accent-purple: #7b2ff7;
+    --accent-green: #3ddc84;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;font-family:'Coolvetica',Arial,Helvetica,sans-serif;}
+  html{
+    height: 100%;
+    height: -webkit-fill-available;
+    overflow: hidden;
+  }
+  body{
+    height:100%;
+    height: calc(var(--vh, 1vh) * 100);
+    height: -webkit-fill-available;
+    width:100%;
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    color:#fff;
+    /* Safe area insets for notches/punch-holes */
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    /* Performance optimizations */
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    /* Prevent zoom on double tap */
+    touch-action: pan-x pan-y;
+    /* Ensure full viewport coverage */
+    position: fixed;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+  }
+  /* Respect reduced motion preference */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+  
+  /* Performance: Use compositor-only properties for animations */
+  @supports (transform: translateZ(0)) {
+    body.startOrange::before,
+    body.startOrange::after,
+    body.purpleBg::before,
+    body.purpleBg::after {
+      transform: translateZ(0);
+    }
+  }
+  
+  /* Performance optimizations - Only apply GPU acceleration where needed */
+  .gameBox, #backButton, #skipButton, #startButton, .quizOption {
+    contain: layout style paint;
+  }
+  
+  /* Optimize canvas rendering */
+  canvas {
+    image-rendering: auto;
+  }
+  
+  /* Optimize video rendering */
+  video {
+    contain: layout style paint;
+  }
+
+  /* Optimized smooth fluid gradient - Orange (no blur, smaller size, smoother transitions) */
+  body.startOrange{
+    background: #000000;
+    position: relative;
+    overflow: hidden;
+  }
+  body.startOrange::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at 30% 50%, rgba(255, 140, 26, 0.25) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 50%, rgba(255, 165, 0, 0.2) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 30%, rgba(255, 122, 0, 0.15) 0%, transparent 50%);
+    background-size: 200% 200%;
+    animation: smoothGradientOrange 30s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+    will-change: background-position;
+  }
+  body.startOrange::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at 60% 70%, rgba(255, 165, 0, 0.2) 0%, transparent 50%),
+                radial-gradient(ellipse at 40% 20%, rgba(255, 140, 26, 0.18) 0%, transparent 50%);
+    background-size: 180% 180%;
+    animation: smoothGradientOrange2 35s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+    will-change: background-position;
+  }
+  @keyframes smoothGradientOrange {
+    0%, 100% { background-position: 0% 50%, 100% 50%, 50% 0%; }
+    33% { background-position: 100% 30%, 0% 70%, 30% 100%; }
+    66% { background-position: 50% 100%, 50% 0%, 70% 50%; }
+  }
+  @keyframes smoothGradientOrange2 {
+    0%, 100% { background-position: 60% 70%, 40% 20%; }
+    50% { background-position: 40% 30%, 60% 80%; }
+  }
+
+  /* Optimized smooth fluid gradient - Purple (no blur, smaller size, smoother transitions) */
+  body.purpleBg{
+    background: #000000;
+    position: relative;
+    overflow: hidden;
+  }
+  body.purpleBg::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at 30% 50%, rgba(123, 47, 247, 0.25) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 50%, rgba(155, 89, 182, 0.2) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 30%, rgba(164, 99, 242, 0.15) 0%, transparent 50%);
+    background-size: 200% 200%;
+    animation: smoothGradientPurple 30s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+    will-change: background-position;
+  }
+  body.purpleBg::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at 60% 70%, rgba(155, 89, 182, 0.2) 0%, transparent 50%),
+                radial-gradient(ellipse at 40% 20%, rgba(123, 47, 247, 0.18) 0%, transparent 50%);
+    background-size: 180% 180%;
+    animation: smoothGradientPurple2 35s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+    will-change: background-position;
+  }
+  @keyframes smoothGradientPurple {
+    0%, 100% { background-position: 0% 50%, 100% 50%, 50% 0%; }
+    33% { background-position: 100% 30%, 0% 70%, 30% 100%; }
+    66% { background-position: 50% 100%, 50% 0%, 70% 50%; }
+  }
+  @keyframes smoothGradientPurple2 {
+    0%, 100% { background-position: 60% 70%, 40% 20%; }
+    50% { background-position: 40% 30%, 60% 80%; }
+  }
+
+  /* Start page - Button positioned at center */
+  #startPage{
+    position:fixed;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    z-index:50;
+    pointer-events:auto;
+  }
+  #startButton{
+    padding:12px 46px;
+    font-size:16px;
+    border-radius:16px;
+    border:1px solid rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(10px) saturate(140%);
+    -webkit-backdrop-filter: blur(10px) saturate(140%);
+    color: #fff;
+    cursor:pointer;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.18);
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out, background 0.2s ease-out;
+    position: relative;
+    z-index: 0;
+    overflow: visible;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    contain: layout style paint;
+  }
+  /* Neon Orange glow effect */
+  #startButton::before {
+    content: "";
+    background: linear-gradient(
+      45deg,
+      #FF8C1A, #FFB04D, #FFA500, #FF7A00,
+      #FF8C1A, #FFB04D, #FFA500, #FF8C1A
+    );
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    background-size: 600%;
+    z-index: -1;
+    width: calc(100% + 4px);
+    height: calc(100% + 4px);
+    filter: blur(8px);
+    animation: glowingOrange 20s linear infinite;
+    transition: opacity .3s ease-in-out;
+    border-radius: 14px;
+    opacity: 0;
+  }
+  @keyframes glowingOrange {
+    0% {background-position: 0 0;}
+    50% {background-position: 400% 0;}
+    100% {background-position: 0 0;}
+  }
+  #startButton:hover::before {
+    opacity: 1;
+  }
+  #startButton:hover,
+  #startButton:active{ 
+    transform: translateY(-4px) scale(1.05); 
+    box-shadow: 0 18px 48px rgba(0,0,0,0.26);
+  }
+  #startButton:active {
+    color: #fff;
+  }
+  #startButton:focus {
+    outline: 2px solid rgba(255,255,255,0.3);
+    outline-offset: 2px;
+  }
+  /* subtle pulse animation for start button */
+  @keyframes startPulse {
+    0% { box-shadow: 0 10px 40px rgba(0,0,0,0.12); transform: translateY(0); }
+    50% { box-shadow: 0 14px 46px rgba(0,0,0,0.18); transform: translateY(-2px); }
+    100% { box-shadow: 0 10px 40px rgba(0,0,0,0.12); transform: translateY(0); }
+  }
+  #startButton.pulse { animation: startPulse 3s ease-in-out infinite; }
+
+  #loadingBarContainer{ 
+    width:60%; max-width:600px; height:14px; 
+    background: rgba(255,255,255,0.12); 
+    backdrop-filter: blur(8px) saturate(140%);
+    -webkit-backdrop-filter: blur(8px) saturate(140%);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius:12px; margin-top:18px; overflow:hidden; display:none;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+  }
+  /* loading bar white as requested */
+  #loadingBar{ width:0%; height:100%; background: white; border-radius:12px; transition: width 2s ease-in-out; }
+
+  /* main screen (hidden initially) */
+  #mainScreen{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; z-index:10; pointer-events:none; }
+  #mainScreen.visible { pointer-events:auto; }
+
+  .box-container{
+    width:90%; max-width:1200px; height:auto; max-height:85vh; display:grid;
+    grid-template-columns: repeat(auto-fit,minmax(140px,1fr));
+    gap:22px; align-content:center; padding:20px; z-index:12;
+    transition: opacity 0.25s ease-out, transform 0.25s ease-out;
+    box-sizing: border-box;
+    overflow-y: auto;
+  }
+
+  .gameBox{
+    border-radius:18px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+    border: 1px solid rgba(255,255,255,0.06);
+    display:flex; align-items:center; justify-content:center; font-size:20px;
+    padding:20px; cursor:pointer; 
+    box-shadow:0 8px 24px rgba(0,0,0,0.18);
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out, opacity 0.2s ease-out;
+    position: relative;
+    opacity: 1;
+    z-index: 0;
+    overflow: visible;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    contain: layout style paint;
+    min-height: 80px;
+    word-wrap: break-word;
+    text-align: center;
+  }
+  /* Purple glow effect */
+  .gameBox::before {
+    content: "";
+    background: linear-gradient(
+      45deg,
+      #7b2ff7, #9b59b6, #a463f2, #8e44ad,
+      #7b2ff7, #9b59b6, #a463f2, #7b2ff7
+    );
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    background-size: 600%;
+    z-index: -1;
+    width: calc(100% + 4px);
+    height: calc(100% + 4px);
+    filter: blur(8px);
+    animation: glowingPurple 20s linear infinite;
+    transition: opacity .3s ease-in-out;
+    border-radius: 16px;
+    opacity: 0;
+  }
+  .gameBox:hover::before {
+    opacity: 1;
+  }
+  .gameBox.disabled { pointer-events: none; opacity: 0.28; filter: blur(0.2px); }
+  .gameBox:hover,
+  .gameBox:active { 
+    transform: translateY(-6px) scale(1.05); 
+    box-shadow:0 18px 40px rgba(0,0,0,0.28);
+  }
+  .gameBox:focus {
+    outline: 2px solid rgba(255,255,255,0.3);
+    outline-offset: 2px;
+  }
+  .gameBox.completed:hover { transform: none; }
+
+  /* completed tick */
+  .gameBox .tick {
+    position: absolute;
+    top:50%; left:50%; transform: translate(-50%, -50%) scale(0);
+    width:48px; height:48px; border-radius:50%;
+    background: var(--accent-green);
+    display:flex; align-items:center; justify-content:center;
+    color:#062; font-weight:800; font-size:24px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+    z-index: 2;
+  }
+  .gameBox.completed { 
+    pointer-events: none; 
+    opacity: 0.4; 
+    cursor: default;
+  }
+  .gameBox.completed .tick { 
+    transform: translate(-50%, -50%) scale(1); 
+    transition: transform .35s cubic-bezier(.2,1,.3,1); 
+  }
+  .gameBox.completed::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.2);
+    border-radius: 18px;
+    z-index: 1;
+  }
+
+  /* Psyche overlay + dim */
+  #dimOverlay{ 
+    position:fixed; inset:0; background: rgba(0,0,0,0.44); 
+    display:none; z-index:1000; 
+    opacity: 0;
+    transition: opacity 0.3s ease-out;
+  }
+  #dimOverlay.show {
+    display: block;
+    opacity: 1;
+  }
+  #dimOverlay.game3Mode{ background: rgba(0,0,0,0.4); } /* 40% opacity for Game 3 */
+  #dimOverlay.game4Mode{ background: rgba(0,0,0,0.4); } /* 40% opacity for Game 4 */
+  #psycheOverlay{
+    position:fixed; left:50%; top:50%; transform:translate(-50%, -50%) scale(0.95);
+    width:86%; max-width:640px; padding:18px 22px; border-radius:24px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+    border:1px solid rgba(255,255,255,0.12);
+    backdrop-filter: blur(12px) saturate(150%);
+    box-shadow:0 18px 40px rgba(0,0,0,0.35);
+    text-align:center; z-index:1100; pointer-events:none; 
+    opacity:0; 
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-sizing: border-box;
+  }
+  #psycheOverlay.show { 
+    pointer-events:auto; 
+    opacity:1; 
+    transform: translate(-50%, -50%) scale(1);
+  }
+  #psycheOverlay.bottomMode{
+    position:fixed; left:50%; transform:translateX(-50%);
+    bottom:22px; top:auto;
+  }
+  #psycheOverlay.bottomMode.show { transform:translateX(-50%) translateY(0); }
+  #psycheOverlay img{ width:72px; height:72px; border-radius:50%; display:block; margin:0 auto 10px; object-fit:cover; box-shadow:0 8px 22px rgba(0,0,0,0.35); }
+  #psycheText{ color:#fff; font-size:15px; line-height:1.4; padding:0 6px; user-select:none; }
+  #psycheTriangle{ width:0; height:0; border-left:11px solid transparent; border-right:11px solid transparent; border-top:11px solid #fff; margin:10px auto 0; opacity:0; }
+
+  /* Top right Psyche popup - now positioned above quiz question */
+  #psychePopup{
+    position:fixed; left:50%; top:20%; transform:translateX(-50%) translateY(-10px);
+    width:90%; max-width:320px; min-width:250px; margin-bottom:12px;
+    padding:16px 22px; border-radius:18px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.05));
+    border:1px solid rgba(255,255,255,0.14);
+    backdrop-filter: blur(12px) saturate(150%);
+    box-shadow:0 12px 32px rgba(0,0,0,0.4);
+    text-align:center; z-index:1500; pointer-events:none; opacity:0; 
+    transition: opacity 0.25s ease-out, transform 0.25s ease-out;
+    box-sizing: border-box;
+  }
+  #psychePopup.show { 
+    pointer-events:auto; 
+    opacity:1; 
+    transform:translateX(-50%) translateY(0) !important; 
+  }
+  #psychePopup img{ width:56px; height:56px; border-radius:50%; display:block; margin:0 auto 8px; object-fit:cover; box-shadow:0 6px 18px rgba(0,0,0,0.35); }
+  #psychePopupText{ color:#fff; font-size:clamp(16px, 4vw, 18px); font-weight:600; line-height:1.3; user-select:none; word-wrap: break-word; }
+
+  /* quiz container */
+  #quizContainer{
+    position:fixed; left:50%; top:50%; transform:translate(-50%,-50%) scale(0.95);
+    width:60%; max-width:500px; padding:28px; border-radius:22px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+    border:1px solid rgba(255,255,255,0.12);
+    backdrop-filter: blur(15px) saturate(160%);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+    display:none; z-index:1200;
+    opacity: 0;
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-sizing: border-box;
+  }
+  #quizContainer.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  #quizContainer.relative { position: relative; }
+  .quizQuestion{ 
+    color:#fff; 
+    font-size:18px; 
+    margin-bottom:18px; 
+    text-align:center; 
+    word-wrap: break-word;
+    hyphens: auto;
+    padding: 0 10px;
+  }
+  .quizOptions{ display:flex; flex-direction:column; gap:10px; align-items:center; }
+  .quizOption{
+    width:85%; max-width:420px; background:rgba(255,255,255,0.15); border-radius:14px;
+    padding:12px 16px; color:#fff; border:1px solid rgba(255,255,255,0.12);
+    cursor:pointer; 
+    transition: background 0.2s ease-out, transform 0.2s ease-out; 
+    text-align:center; font-size:16px;
+    position: relative;
+    z-index: 0;
+    overflow: visible;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    contain: layout style paint;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    word-wrap: break-word;
+    hyphens: auto;
+  }
+  /* Purple glow effect */
+  .quizOption::before {
+    content: "";
+    background: linear-gradient(
+      45deg,
+      #7b2ff7, #9b59b6, #a463f2, #8e44ad,
+      #7b2ff7, #9b59b6, #a463f2, #7b2ff7
+    );
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    background-size: 600%;
+    z-index: -1;
+    width: calc(100% + 4px);
+    height: calc(100% + 4px);
+    filter: blur(8px);
+    animation: glowingPurple 20s linear infinite;
+    transition: opacity .3s ease-in-out;
+    border-radius: 12px;
+    opacity: 0;
+  }
+  .quizOption:hover::before {
+    opacity: 1;
+  }
+  .quizOption:hover,
+  .quizOption:active { 
+    transform: scale(1.05); 
+  }
+  .quizOption:focus {
+    outline: 2px solid rgba(255,255,255,0.3);
+    outline-offset: 2px;
+  }
+  .quizOption.correct{ background: rgba(0,200,100,0.55); border-color: rgba(0,200,100,0.55); }
+  .quizOption.wrong{ background: rgba(255,60,60,0.55); border-color: rgba(255,60,60,0.55); }
+
+  /* puzzle container */
+  #puzzleContainer{
+    position:fixed; left:50%; top:50%; transform:translate(-50%,-50%) scale(0.95);
+    width:40%; max-width:280px; height:40vw; max-height:280px; min-height:220px; display:none; gap:2px; z-index:1200;
+    background: transparent;
+    border-radius: 10px;
+    padding: 2px;
+    opacity: 0;
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+    box-sizing: border-box;
+    aspect-ratio: 1;
+  }
+  #puzzleContainer.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  /* Crossy Road game container */
+  #crossyGameContainer{
+    position:fixed; left:50%; top:50%; transform:translate(-50%,-50%) scale(0.95);
+    width:60%; max-width:600px; height:60vh; max-height:600px; min-height:400px; display:none; z-index:1200;
+    background: linear-gradient(180deg, #87CEEB 0%, #98D8C8 100%);
+    border-radius: 20px;
+    border: 2px solid rgba(255,255,255,0.3);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+    box-sizing: border-box;
+  }
+  #crossyGameContainer.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  #crossyGameCanvas{
+    width:100%; height:100%; display:block; cursor: pointer;
+  }
+  #crossyGameUI{
+    position:absolute; top:15px; left:15px; right:15px;
+    display:flex; justify-content:space-between; align-items:center;
+    z-index:10; pointer-events:none;
+  }
+  #crossyGameScore{
+    color:#fff; font-size:22px; font-weight:700; text-shadow: 0 2px 8px rgba(0,0,0,0.7);
+    background:rgba(255,255,255,0.08);
+    backdrop-filter: blur(12px) saturate(150%);
+    -webkit-backdrop-filter: blur(12px) saturate(150%);
+    border: 1px solid rgba(255,255,255,0.18);
+    padding:8px 16px; border-radius:12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+  }
+  #crossyGameCoins{
+    color:#FFD700; font-size:20px; font-weight:700; text-shadow: 0 2px 8px rgba(0,0,0,0.7);
+    background:rgba(255,255,255,0.08);
+    backdrop-filter: blur(12px) saturate(150%);
+    -webkit-backdrop-filter: blur(12px) saturate(150%);
+    border: 1px solid rgba(255,255,255,0.18);
+    padding:8px 16px; border-radius:12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+  }
+  #puzzleContainer > div{
+    background-size: cover;
+    background-position: center;
+    transition: transform .2s ease;
+    border-radius:6px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.28);
+    user-select: none;
+  }
+  
+  /* Snake Game (Game 4) - Purple Liquid Glass Theme */
+  #snakeGameContainer{
+    position:fixed; left:50%; top:50%; transform:translate(-50%,-50%) scale(0.95);
+    width:40%; max-width:280px; height:40vw; max-height:280px; min-height:220px; display:none; z-index:1200;
+    background: transparent;
+    border-radius: 20px;
+    border: 3px solid rgba(0,0,0,0.4);
+    backdrop-filter: blur(20px) saturate(180%);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5), inset 0 0 40px rgba(0,0,0,0.1);
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    aspect-ratio: 1;
+  }
+  #snakeGameContainer.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  #snakeGameCanvas{
+    width:100%; height:100%; display:block;
+    background: #000;
+    cursor: pointer;
+    border-radius: 18px;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  /* Scoreboard moved to top-right corner of screen */
+  #snakeGameScore{
+    position:fixed; 
+    top:max(15px, env(safe-area-inset-top, 15px)); 
+    right:max(15px, env(safe-area-inset-right, 15px)); 
+    z-index:1400;
+    color:#fff; font-size:clamp(14px, 2.5vw, 18px); font-weight:700; 
+    font-family:'Lemon Milk', Arial, sans-serif;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.7);
+    background:rgba(255,255,255,0.08);
+    backdrop-filter: blur(12px) saturate(150%);
+    -webkit-backdrop-filter: blur(12px) saturate(150%);
+    border: 1px solid rgba(255,255,255,0.18);
+    padding:clamp(8px, 1.5vw, 10px) clamp(14px, 2.5vw, 18px); border-radius:12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+    pointer-events:none;
+    transform: translateZ(0);
+  }
+
+  /* Death video overlay for Game 3 */
+  #deathVideoOverlay{
+    position:fixed; inset:0; z-index:3000; background:#000; display:none;
+    align-items:center; justify-content:center;
+    transition: opacity .1s ease;
+  }
+  #deathVideoOverlay video{
+    width:100%; height:100%; object-fit:contain;
+  }
+
+  /* back button - liquid glass circle (no arrow, just circle) */
+  #backButton{
+    position:fixed; top:max(12px, env(safe-area-inset-top, 12px)); left:max(12px, env(safe-area-inset-left, 12px)); z-index:1300; display:none; user-select:none;
+    width:44px; height:44px; border-radius:50%;
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(10px) saturate(140%);
+    -webkit-backdrop-filter: blur(10px) saturate(140%);
+    border: 1px solid rgba(255,255,255,0.14);
+    cursor:pointer;
+    transition: transform 0.2s ease-out, background 0.2s ease-out, box-shadow 0.2s ease-out, opacity 0.2s ease-out;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.1);
+    position: relative;
+    overflow: visible;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    opacity: 0;
+    contain: layout style paint;
+  }
+  #backButton.show {
+    opacity: 1;
+  }
+  /* Purple glow effect */
+  #backButton::before {
+    content: "";
+    background: linear-gradient(
+      45deg,
+      #7b2ff7, #9b59b6, #a463f2, #8e44ad,
+      #7b2ff7, #9b59b6, #a463f2, #7b2ff7
+    );
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    background-size: 600%;
+    z-index: -1;
+    width: calc(100% + 4px);
+    height: calc(100% + 4px);
+    filter: blur(8px);
+    animation: glowingPurple 20s linear infinite;
+    transition: opacity .3s ease-in-out;
+    border-radius: 50%;
+    opacity: 0;
+  }
+  #backButton:hover::before {
+    opacity: 1;
+  }
+  #backButton:hover,
+  #backButton:active{ 
+    transform: scale(1.05); 
+    background: rgba(255,255,255,0.12);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.25), 0 0 15px rgba(255,255,255,0.15), inset 0 1px 0 rgba(255,255,255,0.2);
+    border-color: rgba(255,255,255,0.25);
+  }
+  #backButton:focus {
+    outline: 2px solid rgba(255,255,255,0.3);
+    outline-offset: 2px;
+  }
+
+  /* Celebration sequence styles */
+  #celebrationOverlay{ transition: opacity .5s ease; }
+  #celebrationText{ 
+    backdrop-filter: blur(0px); 
+    transition: backdrop-filter .5s ease;
+  }
+  #typewriterText{
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.6);
+    filter: none !important;
+  }
+  /* Fireworks video - optimized for highest quality and smooth playback */
+  #fireworksVideo{
+    position:absolute; inset:0; width:100%; height:100%;
+    object-fit:cover; object-position:center;
+    z-index:1; pointer-events:none;
+    contain: layout style paint;
+    /* Optimize for highest quality */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    /* Smooth playback */
+    will-change: auto;
+  }
+  #typewriterText{ white-space: pre-line; }
+  #typewriterText.glitch{
+    animation: glitch 0.3s infinite;
+    text-shadow: 2px 0 #ff0080, -2px 0 #00ffff;
+  }
+  @keyframes glitch{
+    0%{ transform: translate(0); }
+    20%{ transform: translate(-2px, 2px); }
+    40%{ transform: translate(-2px, -2px); }
+    60%{ transform: translate(2px, 2px); }
+    80%{ transform: translate(2px, -2px); }
+    100%{ transform: translate(0); }
+  }
+  /* Essay fakeout page - Black and Purple gradient (more black) */
+  #essayFakeoutPage{
+    position:fixed; inset:0; z-index:10000; display:none;
+    background: linear-gradient(135deg, 
+      #000000 0%, 
+      #000000 40%, 
+      rgba(123,47,247,0.3) 50%, 
+      #000000 60%, 
+      #000000 70%, 
+      rgba(155,89,182,0.25) 80%, 
+      #000000 90%, 
+      #000000 100%);
+    background-size: 400% 400%;
+    animation: gradientShift 12s ease infinite;
+    transform: translateZ(0);
+  }
+  @keyframes gradientShift{
+    0%{ background-position: 0% 50%; }
+    50%{ background-position: 100% 50%; }
+    100%{ background-position: 0% 50%; }
+  }
+  #essayFakeoutContent{
+    position:absolute; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; z-index:6001;
+    /* Create new stacking context to isolate from any blur */
+    isolation: isolate;
+  }
+  #essayText{
+    position:absolute; inset:20px; overflow:auto; color:rgba(255,255,255,0.3);
+    font-size:14px; line-height:1.8; padding:20px; filter:blur(2px);
+    font-family:'Coolvetica',Arial,sans-serif;
+    z-index:6000;
+  }
+  #wordCountBox{
+    background:rgba(0,0,0,0.8); backdrop-filter:blur(0px);
+    border:2px solid rgba(255,255,255,0.5); border-radius:16px;
+    padding:20px 40px; color:#fff; font-size:24px; font-weight:700;
+    font-family:'Lemon Milk',Arial,sans-serif; z-index:6002;
+    box-shadow:0 10px 40px rgba(0,0,0,0.8);
+    filter: none !important; /* No blur on word count box */
+    position: relative; /* Ensure it's not affected by parent blur */
+    /* Create new stacking context to prevent parent blur from affecting it */
+    isolation: isolate;
+    will-change: transform;
+  }
+  /* Ensure word count box is not blurred even if parent has blur */
+  #essayFakeoutPage #wordCountBox{
+    filter: none !important;
+    backdrop-filter: blur(0px) !important;
+  }
+  #wordCountBox.glitch{
+    animation: glitch 0.3s infinite;
+    border-color:#ff0080;
+  }
+  /* Button after glitch message - positioned beneath word count box */
+  #finalPageButton{
+    position:absolute; 
+    top:calc(50% + 120px); 
+    left:50%; 
+    transform:translateX(-50%);
+    padding:16px 40px; 
+    background:rgba(255,255,255,0.08);
+    backdrop-filter: blur(8px) saturate(140%);
+    -webkit-backdrop-filter: blur(8px) saturate(140%);
+    border:1px solid rgba(255,255,255,0.14);
+    border-radius:16px; 
+    color:#fff; 
+    font-size:18px; 
+    font-weight:600;
+    font-family:'Coolvetica',Arial,sans-serif; 
+    cursor:pointer;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.18);
+    transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+    z-index:6003;
+    filter: none !important;
+    isolation: isolate;
+    display:none;
+    overflow: visible;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  /* Purple glow effect */
+  #finalPageButton::before {
+    content: "";
+    background: linear-gradient(
+      45deg,
+      #7b2ff7, #9b59b6, #a463f2, #8e44ad,
+      #7b2ff7, #9b59b6, #a463f2, #7b2ff7
+    );
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    background-size: 600%;
+    z-index: -1;
+    width: calc(100% + 4px);
+    height: calc(100% + 4px);
+    filter: blur(8px);
+    animation: glowingPurple 20s linear infinite;
+    transition: opacity .3s ease-in-out;
+    border-radius: 14px;
+    opacity: 0;
+  }
+  #finalPageButton:hover::before {
+    opacity: 1;
+  }
+  #finalPageButton:focus {
+    outline: 2px solid rgba(255,255,255,0.3);
+    outline-offset: 2px;
+  }
+  /* Final page - Video background */
+  #finalPage{
+    position:fixed; inset:0; z-index:11000; display:none;
+    background: #000;
+    overflow:auto;
+    position: relative;
+  }
+  #finalPageVideo{
+    position:fixed; inset:0; width:100%; height:100%;
+    object-fit:cover; object-position:center;
+    z-index:1; pointer-events:none;
+    contain: layout style paint;
+  }
+  #finalPageOverlay{
+    position:fixed; inset:0; background:rgba(0,0,0,0.3);
+    z-index:2; pointer-events:none;
+  }
+  
+  /* Glowing Red Fluid Blobs for Final Page - Optimized */
+  .fluidBlob-red-glow {
+    position: fixed;
+    border-radius: 50%;
+    opacity: 0.9;
+    box-shadow: 0 0 100px rgba(255,0,0,0.5), 0 0 200px rgba(255,0,0,0.3);
+    contain: layout style paint;
+  }
+  
+  /* Glowing red blob - top left */
+  .fluidBlob-red-glow-1 {
+    width: 500px;
+    height: 450px;
+    top: -150px;
+    left: -150px;
+    background: radial-gradient(circle, rgba(255,0,0,0.9) 0%, rgba(220,20,60,0.8) 50%, rgba(139,0,0,0.7) 100%);
+    animation: glowRed1 20s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+  
+  /* Glowing red blob - top right */
+  .fluidBlob-red-glow-2 {
+    width: 550px;
+    height: 500px;
+    top: -100px;
+    right: -100px;
+    background: radial-gradient(circle, rgba(255,69,0,0.9) 0%, rgba(255,0,0,0.8) 50%, rgba(220,20,60,0.7) 100%);
+    animation: glowRed2 25s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+  
+  /* Glowing red blob - bottom left */
+  .fluidBlob-red-glow-3 {
+    width: 600px;
+    height: 550px;
+    bottom: -200px;
+    left: -200px;
+    background: radial-gradient(ellipse, rgba(255,0,0,0.95) 0%, rgba(220,20,60,0.85) 50%, rgba(139,0,0,0.75) 100%);
+    animation: glowRed3 22s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    border-radius: 40% 60% 50% 50%;
+  }
+  
+  /* Glowing red blob - bottom right */
+  .fluidBlob-red-glow-4 {
+    width: 450px;
+    height: 450px;
+    bottom: -100px;
+    right: -100px;
+    background: radial-gradient(circle, rgba(255,20,147,0.9) 0%, rgba(255,0,0,0.8) 50%, rgba(220,20,60,0.7) 100%);
+    animation: glowRed4 18s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+  
+  /* Glowing red blob - center */
+  .fluidBlob-red-glow-5 {
+    width: 700px;
+    height: 700px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(255,0,0,0.8) 0%, rgba(220,20,60,0.7) 50%, rgba(139,0,0,0.6) 100%);
+    animation: glowRed5 30s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+  
+  /* Glowing red animations - Optimized for smooth performance */
+  @keyframes glowRed1 {
+    0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.8; }
+    25% { transform: translate(40px, -50px) scale(1.2); opacity: 0.9; }
+    50% { transform: translate(-30px, 30px) scale(0.95); opacity: 0.7; }
+    75% { transform: translate(50px, 20px) scale(1.1); opacity: 0.85; }
+  }
+  
+  @keyframes glowRed2 {
+    0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.8; }
+    33% { transform: translate(-50px, 40px) scale(1.25); opacity: 0.95; }
+    66% { transform: translate(35px, -35px) scale(0.9); opacity: 0.75; }
+  }
+  
+  @keyframes glowRed3 {
+    0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 0.8; }
+    30% { transform: translate(55px, -40px) scale(1.15) rotate(5deg); opacity: 0.9; }
+    60% { transform: translate(-40px, 50px) scale(0.98) rotate(-3deg); opacity: 0.75; }
+  }
+  
+  @keyframes glowRed4 {
+    0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.8; }
+    40% { transform: translate(-45px, -25px) scale(1.3); opacity: 0.95; }
+    80% { transform: translate(25px, 35px) scale(0.92); opacity: 0.75; }
+  }
+  
+  @keyframes glowRed5 {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+    50% { transform: translate(-50%, -50%) scale(1.4); opacity: 0.8; }
+  }
+  #finalPageContent{
+    width:100%; height:100%; margin:0; padding:clamp(20px, 5vw, 60px);
+    color:#fff; font-size:clamp(14px, 2.5vw, 20px); line-height:1.8;
+    font-family:'Coolvetica',Arial,sans-serif;
+    display:flex; flex-direction:column; justify-content:flex-start;
+    box-sizing:border-box; overflow-y:auto;
+    padding-top:clamp(40px, 8vh, 80px);
+    position:relative; z-index:3;
+  }
+  #finalPageContent h1{
+    display:none; /* Remove "Final Message" heading */
+  }
+  #finalPageContent p{
+    margin:0 0 clamp(15px, 3vw, 25px) 0;
+    text-align:justify;
+    opacity: 0;
+  }
+  #finalPageContent p.visible{
+    opacity: 1;
+    transition: opacity 0.3s ease-in;
+  }
+  /* Typewriter effect for final page text */
+  .typewriter-char {
+    opacity: 0;
+    animation: fadeInChar 0.05s ease-in forwards;
+  }
+  @keyframes fadeInChar {
+    to { opacity: 1; }
+  }
+  /* Skip button */
+  #skipButton{
+    position:fixed !important; 
+    top:max(20px, env(safe-area-inset-top, 20px)) !important; 
+    right:max(20px, env(safe-area-inset-right, 20px)) !important;
+    left:auto !important;
+    z-index:2000 !important;
+    padding:10px 20px; background:rgba(255,255,255,0.08);
+    backdrop-filter: blur(10px) saturate(140%);
+    -webkit-backdrop-filter: blur(10px) saturate(140%);
+    border:1px solid rgba(255,255,255,0.14);
+    border-radius:12px; color:#fff; cursor:pointer;
+    font-size:12px; font-weight:600; 
+    transition: transform 0.2s ease-out, background 0.2s ease-out, box-shadow 0.2s ease-out;
+    display:block !important; /* Always visible */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.1);
+    position: relative;
+    overflow: visible;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    contain: layout style paint;
+  }
+  /* Purple glow effect */
+  #skipButton::before {
+    content: "";
+    background: linear-gradient(
+      45deg,
+      #7b2ff7, #9b59b6, #a463f2, #8e44ad,
+      #7b2ff7, #9b59b6, #a463f2, #7b2ff7
+    );
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    background-size: 600%;
+    z-index: -1;
+    width: calc(100% + 4px);
+    height: calc(100% + 4px);
+    filter: blur(8px);
+    animation: glowingPurple 20s linear infinite;
+    transition: opacity .3s ease-in-out;
+    border-radius: 10px;
+    opacity: 0;
+  }
+  #skipButton:hover::before {
+    opacity: 1;
+  }
+  #skipButton:hover,
+  #skipButton:active{ 
+    background:rgba(255,255,255,0.12); 
+    transform:scale(1.05);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.25), 0 0 15px rgba(255,255,255,0.15), inset 0 1px 0 rgba(255,255,255,0.2);
+    border-color: rgba(255,255,255,0.25);
+  }
+  #skipButton:focus {
+    outline: 2px solid rgba(255,255,255,0.3);
+    outline-offset: 2px;
+  }
+
+  /* Mobile-first responsive design - comprehensive breakpoints */
+  
+  /* Large tablets and small desktops */
+  @media (max-width:1024px){
+    .box-container{ width:92%; gap:18px; }
+    #quizContainer{ width:60%; max-width:480px; padding:26px; }
+    #puzzleContainer{ width:40%; height:40vw; max-width:260px; max-height:260px; }
+    #crossyGameContainer{ width:60%; max-width:550px; height:60vh; max-height:550px; }
+    #snakeGameContainer{ width:40%; height:40vw; max-width:280px; max-height:280px; }
+  }
+  
+  /* Tablets */
+  @media (max-width:768px){
+    #psycheOverlay{ 
+      width:90%; 
+      max-width:none; 
+      padding:16px 18px; 
+      max-height:85vh;
+      overflow-y: auto;
+    }
+    #quizContainer{ 
+      width:65%; 
+      max-width:450px;
+      padding:22px; 
+      max-height:85vh;
+      overflow-y: auto;
+    }
+    #puzzleContainer{ 
+      width:40%; 
+      height:40vw; 
+      max-width:260px; 
+      max-height:260px;
+    }
+    #crossyGameContainer{ 
+      width:65%; 
+      max-width:520px;
+      height:60vh; 
+      max-height:520px; 
+    }
+    #snakeGameContainer{ 
+      width:40%; 
+      height:40vw; 
+      max-width:280px;
+      max-height:280px; 
+    }
+    #finalPageContent{ 
+      padding:clamp(15px, 4vw, 30px); 
+      font-size:clamp(13px, 2.2vw, 19px); 
+    }
+    .box-container{ 
+      width:92%; 
+      gap:16px; 
+      padding:16px;
+    }
+    .gameBox{ 
+      font-size:clamp(16px, 3.5vw, 20px); 
+      padding:16px; 
+      min-height: 80px;
+    }
+    #startButton{ 
+      padding:12px 40px; 
+      font-size:16px; 
+    }
+    #backButton, #skipButton{
+      width:40px;
+      height:40px;
+    }
+  }
+  
+  /* Mobile phones */
+  @media (max-width:520px){
+    #startButton{ 
+      padding:12px 32px; 
+      font-size:15px; 
+      border-radius:14px; 
+    }
+    #puzzleContainer{ 
+      width:40%; 
+      height:40vw; 
+      max-width:250px; 
+      max-height:250px;
+    }
+    #snakeGameContainer{
+      width:40%;
+      height:40vw;
+      max-width:260px;
+      max-height:260px;
+    }
+    #psycheOverlay{ 
+      width:92%; 
+      padding:14px 16px;
+      max-height:80vh;
+    }
+    #psycheOverlay img{ 
+      width:52px; 
+      height:52px; 
+    }
+    #psycheText{ 
+      font-size:13px; 
+      line-height:1.5;
+    }
+    #quizContainer{
+      width:70%;
+      max-width:420px;
+      padding:20px;
+      max-height:85vh;
+    }
+    #crossyGameContainer{
+      width:70%;
+      max-width:480px;
+      height:60vh;
+      max-height:480px;
+    }
+    .quizOption{
+      width:90%;
+      padding:14px 16px;
+      font-size:15px;
+    }
+    /* Ensure Saiki popup is visible on mobile */
+    #psychePopup{
+      width:85%;
+      max-width:280px;
+      min-width:220px;
+      padding:14px 18px;
+      margin-bottom:10px;
+      z-index:1400;
+    }
+    #psychePopup img{
+      width:48px;
+      height:48px;
+    }
+    #psychePopupText{
+      font-size:16px;
+    }
+    #typewriterText{ 
+      font-size:clamp(18px, 5vw, 32px) !important; 
+      padding: 0 10px;
+    }
+    #wordCountBox{ 
+      font-size:clamp(16px, 4vw, 24px); 
+      padding:14px 24px; 
+    }
+    #finalPageButton{ 
+      padding:12px 28px; 
+      font-size:15px; 
+    }
+    .box-container{ 
+      width:90%; 
+      gap:14px; 
+      padding:12px;
+    }
+    .gameBox{ 
+      padding:14px; 
+      font-size:clamp(15px, 3.5vw, 18px);
+      min-height: 70px;
+    }
+    #backButton, #skipButton{
+      width:38px;
+      height:38px;
+      font-size:11px;
+    }
+    #snakeGameScore{
+      font-size:clamp(12px, 2.2vw, 16px);
+      padding:6px 12px;
+    }
+    #crossyGameScore, #crossyGameCoins{
+      font-size:clamp(16px, 3vw, 20px);
+      padding:6px 12px;
+    }
+  }
+  
+  /* Small mobile phones (iPhone SE, etc.) */
+  @media (max-width:375px){
+    #psycheOverlay{ 
+      padding:12px 14px; 
+      width:94%;
+    }
+    #quizContainer{ 
+      padding:18px; 
+      width:75%;
+      max-width:380px;
+    }
+    #crossyGameContainer{
+      width:75%;
+      max-width:450px;
+      height:60vh;
+      max-height:450px;
+    }
+    .gameBox{ 
+      padding:12px; 
+      font-size:14px;
+      min-height: 65px;
+    }
+    .box-container{
+      gap:12px;
+      padding:10px;
+    }
+    #startButton{
+      padding:10px 28px;
+      font-size:14px;
+    }
+    #backButton, #skipButton{
+      width:36px;
+      height:36px;
+      top:10px;
+      left:10px;
+      right:10px;
+    }
+    #finalPageContent{
+      padding:clamp(12px, 3vw, 20px);
+      font-size:clamp(12px, 1.8vw, 16px);
+    }
+  }
+  
+  /* Extra small devices */
+  @media (max-width:320px){
+    .gameBox{
+      font-size:13px;
+      padding:10px;
+      min-height: 60px;
+    }
+    #startButton{
+      padding:8px 24px;
+      font-size:13px;
+    }
+    #quizContainer{
+      padding:16px;
+    }
+    .quizOption{
+      font-size:14px;
+      padding:12px 14px;
+    }
+  }
+  
+  /* Landscape orientation adjustments */
+  @media (orientation: landscape) and (max-height:500px){
+    #startButton{ 
+      margin-top:8px; 
+      padding:10px 30px;
+    }
+    .box-container{ 
+      height:auto; 
+      max-height:85vh; 
+      gap:10px; 
+      padding:10px;
+    }
+    #psycheOverlay{ 
+      max-height:75vh; 
+      overflow-y:auto; 
+      width:88%;
+    }
+    #quizContainer{
+      width:60%;
+      max-width:400px;
+      max-height:80vh;
+      overflow-y: auto;
+    }
+    #crossyGameContainer{
+      width:60%;
+      max-width:450px;
+      height:60vh;
+      max-height:450px;
+    }
+    #puzzleContainer{
+      width:40%;
+      height:40vh;
+      max-width:280px;
+      max-height:280px;
+    }
+    #snakeGameContainer{
+      width:40%;
+      height:40vh;
+      max-width:280px;
+      max-height:280px;
+    }
+    #snakeGameContainer{
+      width:50%;
+      height:50vh;
+      max-width:380px;
+      max-height:380px;
+    }
+    #crossyGameContainer{
+      height:90vh;
+      max-height:500px;
+    }
+    #snakeGameContainer{
+      width:50%;
+      height:50vh;
+      max-width:380px;
+      max-height:380px;
+    }
+    #finalPageContent{
+      padding:clamp(10px, 2vw, 20px);
+      font-size:clamp(11px, 1.5vw, 16px);
+    }
+  }
+  
+  /* iPhone X and newer (notch support) */
+  @supports (padding: max(0px)) {
+    html, body {
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    #backButton{
+      top: max(12px, env(safe-area-inset-top, 12px));
+      left: max(12px, env(safe-area-inset-left, 12px));
+    }
+    #skipButton{
+      top: max(20px, env(safe-area-inset-top, 20px));
+      right: max(20px, env(safe-area-inset-right, 20px));
+    }
+    #snakeGameScore{
+      top: max(15px, env(safe-area-inset-top, 15px));
+      right: max(15px, env(safe-area-inset-right, 15px));
+    }
+  }
+  
+  /* High DPI displays */
+  @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi){
+    #psycheOverlay img, #psychePopup img{ 
+      image-rendering: -webkit-optimize-contrast; 
+    }
+  }
+  
+  /* Ensure all containers fit within viewport */
+  #mainScreen, #startPage, #quizContainer, #puzzleContainer,
+  #crossyGameContainer, #snakeGameContainer, #finalPage, #essayFakeoutPage{
+    max-width: 100vw;
+    max-height: 100vh;
+    box-sizing: border-box;
+  }
+  
+  /* Prevent horizontal scroll on mobile */
+  * {
+    max-width: 100%;
+  }
+  
+  /* Touch-friendly tap targets */
+  @media (hover: none) and (pointer: coarse) {
+    .gameBox, .quizOption, #startButton, #backButton, #skipButton, #finalPageButton{
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
+</style>
+</head>
+<body class="startOrange">
+
+  <!-- Animated Fluid Shapes for Start Screen (Orange to Purple) -->
+  <div id="fluidShapesContainer" class="startScreenFluids">
+    <div class="fluidBlob fluidBlob-1"></div>
+    <div class="fluidBlob fluidBlob-2"></div>
+    <div class="fluidBlob fluidBlob-3"></div>
+    <div class="fluidBlob fluidBlob-4"></div>
+    <div class="fluidBlob fluidBlob-5"></div>
+  </div>
+
+  <!-- Animated Fluid Shapes for Main Menu (Red and Purple) -->
+  <div id="redPurpleFluidsContainer" style="display:none;">
+    <div class="fluidBlob-red-purple fluidBlob-red-1"></div>
+    <div class="fluidBlob-red-purple fluidBlob-purple-1"></div>
+    <div class="fluidBlob-red-purple fluidBlob-red-2"></div>
+    <div class="fluidBlob-red-purple fluidBlob-purple-2"></div>
+    <div class="fluidBlob-red-purple fluidBlob-blend"></div>
+  </div>
+
+  <!-- START / LOADING -->
+  <div id="startPage">
+    <button id="startButton" class="pulse">Start</button>
+    <div id="loadingBarContainer"><div id="loadingBar"></div></div>
+  </div>
+
+  <!-- BACK -->
+  <div id="backButton" title="Back to menu" aria-label="Back to menu"></div>
+  
+  <!-- SKIP BUTTON (for testing) -->
+  <button id="skipButton" title="Skip to final part">Skip to Final Part</button>
+
+  <!-- MAIN SCREEN (hidden until after start) -->
+  <div id="mainScreen" aria-hidden="true">
+    <div class="box-container" id="boxContainer">
+      <div class="gameBox disabled" id="game1">Game 1 <span class="tick">✓</span></div>
+      <div class="gameBox disabled" id="game2">Game 2 <span class="tick">✓</span></div>
+      <div class="gameBox disabled" id="game3">Game 3 <span class="tick">✓</span></div>
+      <div class="gameBox disabled" id="game4">Game 4 <span class="tick">✓</span></div>
+    </div>
+  </div>
+
+  <!-- Dim + Saiki overlay -->
+  <div id="dimOverlay" aria-hidden="true"></div>
+  <div id="psycheOverlay" aria-hidden="true" role="dialog" aria-label="Psyche">
+    <img id="psycheImg" src="Saiki png.jpg" alt="Saiki">
+    <div id="psycheText"></div>
+    <div id="psycheTriangle"></div>
+  </div>
+  <!-- Top right Psyche popup -->
+  <div id="psychePopup" aria-hidden="true">
+    <img src="Saiki png.jpg" alt="Saiki">
+    <div id="psychePopupText"></div>
+  </div>
+
+  <!-- QUIZ & PUZZLE -->
+  <div id="quizContainer" aria-hidden="true"></div>
+  <div id="puzzleContainer" aria-hidden="true"></div>
+  
+  <!-- CROSSY ROAD GAME -->
+  <div id="crossyGameContainer" aria-hidden="true">
+    <div id="crossyGameUI">
+      <div id="crossyGameScore">0</div>
+      <div id="crossyGameCoins" style="display:none;">Coins: 0</div>
+    </div>
+  </div>
+  
+  <!-- SNAKE GAME (Game 4) -->
+  <div id="snakeGameContainer" aria-hidden="true">
+    <canvas id="snakeGameCanvas"></canvas>
+  </div>
+  <!-- Scoreboard positioned at top-right of screen -->
+  <div id="snakeGameScore" style="display:none;">Cherries: 0/19</div>
+  
+  <!-- Death video overlay for Game 3 ONLY -->
+  <div id="deathVideoOverlay" style="display:none;">
+    <video id="deathVideo" src="pauledit.mp4" preload="auto"></video>
+  </div>
+
+  <!-- AUDIO -->
+  <audio id="clairdeluneAudio" src="clairdelune.mp3" preload="auto" loop></audio>
+  <audio id="psycheAudio" src="saiki theme sound.mp3" preload="auto"></audio>
+  <audio id="snoopAudio" src="turnmyswagon.mp3" preload="auto"></audio>
+  <audio id="bagsxdaddyAudio" src="bagsxdaddy.mp3" preload="auto"></audio>
+  <audio id="kanyeAudio" src="kanye.mp3" preload="auto"></audio>
+  <audio id="mariogame3Audio" src="mariogame3.mp3" preload="auto"></audio>
+  <audio id="game1CompletionAudio" src="saikiOST.mp3" preload="auto"></audio>
+  <audio id="cherryAudio" src="cherry.mp3" preload="auto" loop></audio>
+  <audio id="champagnecoastAudio" src="champagnecoast.mp3" preload="auto" loop></audio>
+  
+  <!-- CELEBRATION SEQUENCE -->
+  <div id="celebrationOverlay" style="display:none; position:fixed; inset:0; z-index:5000; background:#000;">
+    <div id="fireworksContainer" style="position:absolute; inset:0; overflow:hidden;">
+      <video id="fireworksVideo" src="orangefireworks.mp4" autoplay loop muted playsinline preload="auto" style="width:100%; height:100%; object-fit:cover; object-position:center;"></video>
+    </div>
+    <div id="celebrationText" style="display:none; position:absolute; inset:0; align-items:center; justify-content:center; z-index:5001; pointer-events:none;">
+      <div id="typewriterText" style="color:#fff; font-size:clamp(24px, 6vw, 48px); font-family:'Coolvetica',Arial,sans-serif; text-align:center; line-height:1.6; max-width:90%;"></div>
+    </div>
+  </div>
+  
+  <!-- ESSAY FAKEOUT PAGE -->
+  <div id="essayFakeoutPage">
+    <div id="essayText"></div>
+    <div id="essayFakeoutContent">
+      <div id="wordCountBox" style="filter: none !important; backdrop-filter: blur(0px) !important;">0/5000</div>
+      <button id="finalPageButton" style="filter: none !important;">Continue</button>
+    </div>
+  </div>
+  
+  <!-- FINAL PAGE (500 word message) -->
+  <div id="finalPage">
+    <!-- Video background -->
+    <video id="finalPageVideo" src="erenocean.mp4" autoplay loop muted playsinline preload="auto"></video>
+    <!-- Black overlay for text readability -->
+    <div id="finalPageOverlay"></div>
+    <div id="finalPageContent">
+      <p>Rufia oh Rufia, I do not even know how to fully explain this properly, but there is something about you that always makes me stop and pay attention in a way I don't usually do with people. You are honestly one of the most interesting people I have met, not just because you're smart, but because your way of thinking feels intentional and sharp. You are emotionally intelligent in a way that is rare for someone our age, and I notice it every single time you speak about something that matters to you. I like how you stick to your own opinions and how you're not afraid to say what you feel, yet you always say things with a calmness that shows you've thought about it first, and that kind of maturity stands out.</p>
+      
+      <p>I love how you have this mix of seriousness and humour that somehow works perfectly. You can be calm one moment and then randomly funny the next, and honestly.. meeting a woman who is actually funny is scary… I AM joking, I am joking. You have this way of making conversations feel natural without even trying, and I genuinely enjoy talking to you more than I expected at the start. I liked how we began as friends and how everything slowly shifted without either of us forcing anything, and I think that is what makes this feel real for me. It was slow, gradual, and the kind of connection that builds without even realising it at first</p>
+      
+      <p>Over time, I realised I care about you far more than I ever expected, and it honestly surprised me how naturally it happened. Even when I'm busy, thoughts of you linger, not in a clingy or overwhelming way, but in that quiet meaningful way where someone just becomes important without trying. I admire the way you notice things most people don't, how you read situations with clarity, and how you genuinely understand the people around you. It makes me feel like I can truly be myself with you, and that's rare for me. Even the small things you say stay with me longer than they probably should, because there's always intention, thought, and depth behind them. And then there's the way you carry yourself, the mix of confidence, calmness, and warmth, and the little things too, like your ADOOOOOORABLE cheeks and how your whole face glows when you smile or laugh. All of this makes you unforgettable, someone I genuinely respect, admire, and care about more deeply than I ever meant to</p>
+      
+      <p>I want to take things slowly because I like you enough to do this properly. I don't want to rush anything or mess anything up. I want to get to know you deeper, understand you more, and let whatever this is become something real in its own time. I don't want to push anything on you, just to be honest about how I feel and let you know that you've become someone very important to me without me even meaning for it to happen. You're special, and I hope this shows that I genuinely mean that</p>
+    </div>
+  </div>
+  
+  <!-- Three.js for Crossy Road Game -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<script>
+/* --------------------------
+   Performance optimizations
+   -------------------------- */
+// Detect device capabilities and reduce animations if needed
+const isLowEndDevice = (() => {
+  if (navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4) return true;
+  if (navigator.deviceMemory && navigator.deviceMemory < 4) return true;
+  return false;
+})();
+
+// Reduce animation complexity on low-end devices
+if (isLowEndDevice) {
+  document.documentElement.style.setProperty('--animation-duration', '0.5s');
+}
+
+/* --------------------------
+   Elements & initial state
+   -------------------------- */
+const body = document.body;
+const startPage = document.getElementById('startPage');
+const startButton = document.getElementById('startButton');
+const loadingBarContainer = document.getElementById('loadingBarContainer');
+const loadingBar = document.getElementById('loadingBar');
+
+const mainScreen = document.getElementById('mainScreen');
+const boxContainer = document.getElementById('boxContainer');
+const gameBoxes = document.querySelectorAll('.gameBox');
+
+const dimOverlay = document.getElementById('dimOverlay');
+const psycheOverlay = document.getElementById('psycheOverlay');
+const psycheText = document.getElementById('psycheText');
+const psycheTriangle = document.getElementById('psycheTriangle');
+const psychePopup = document.getElementById('psychePopup');
+const psychePopupText = document.getElementById('psychePopupText');
+
+const quizContainer = document.getElementById('quizContainer');
+const puzzleContainer = document.getElementById('puzzleContainer');
+const crossyGameContainer = document.getElementById('crossyGameContainer');
+const crossyGameScore = document.getElementById('crossyGameScore');
+const crossyGameEnd = document.getElementById('crossyGameEnd');
+const crossyRetry = document.getElementById('crossyRetry');
+const deathVideoOverlay = document.getElementById('deathVideoOverlay');
+const deathVideo = document.getElementById('deathVideo');
+const snakeGameContainer = document.getElementById('snakeGameContainer');
+const snakeGameCanvas = document.getElementById('snakeGameCanvas');
+const snakeGameScore = document.getElementById('snakeGameScore');
+
+const backButton = document.getElementById('backButton');
+const skipButton = document.getElementById('skipButton');
+
+const clairdeluneAudio = document.getElementById('clairdeluneAudio');
+const psycheAudio = document.getElementById('psycheAudio');
+const snoopAudio = document.getElementById('snoopAudio');
+const bagsxdaddyAudio = document.getElementById('bagsxdaddyAudio');
+const kanyeAudio = document.getElementById('kanyeAudio');
+const mariogame3Audio = document.getElementById('mariogame3Audio');
+const game1CompletionAudio = document.getElementById('game1CompletionAudio');
+
+clairdeluneAudio.volume = 0.75;
+psycheAudio.volume = 0.30;
+snoopAudio.volume = 0.9;
+bagsxdaddyAudio.volume = 0.9;
+
+let psycheReady = false; // true when triangle visible
+let gamesEnabled = false;
+let shouldRedirectToMenu = false; // flag for redirecting after speech closes
+let clairdelunePlaying = false;
+
+// Start clairdelune audio immediately on page load
+function startClairdelune() {
+  if (clairdelunePlaying) return;
+  clairdeluneAudio.volume = 0.75;
+  clairdeluneAudio.loop = true;
+  clairdeluneAudio.play().then(() => {
+    clairdelunePlaying = true;
+  }).catch((err) => {
+    // Autoplay blocked - try again on user interaction
+    console.log('Clairdelune autoplay blocked, will retry on interaction');
+    document.addEventListener('click', function tryPlayOnce() {
+      clairdeluneAudio.play().then(() => {
+        clairdelunePlaying = true;
+        document.removeEventListener('click', tryPlayOnce);
+      }).catch(() => {});
+    }, { once: true });
+  });
+}
+
+  // Initialize on page load
+  startClairdelune();
+  
+  /* --------------------------
+     Mobile viewport and orientation handling
+     -------------------------- */
+  // Fix viewport height on mobile browsers
+  function setViewportHeight() {
+    const vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+  }
+  
+  // Set initial viewport height
+  setViewportHeight();
+  
+  // Update on resize and orientation change
+  window.addEventListener('resize', setViewportHeight);
+  window.addEventListener('orientationchange', () => {
+    setTimeout(setViewportHeight, 100);
+  });
+  
+  // Prevent zoom on double tap (iOS)
+  let lastTouchEnd = 0;
+  document.addEventListener('touchend', function (event) {
+    const now = Date.now();
+    if (now - lastTouchEnd <= 300) {
+      event.preventDefault();
+    }
+    lastTouchEnd = now;
+  }, false);
+  
+  // Ensure all containers fit within viewport
+  function ensureViewportFit() {
+    const containers = [
+      '#quizContainer', '#puzzleContainer', '#crossyGameContainer', 
+      '#snakeGameContainer', '#psycheOverlay', '#finalPage'
+    ];
+    
+    containers.forEach(selector => {
+      const el = document.querySelector(selector);
+      if (el && el.style.display !== 'none') {
+        const rect = el.getBoundingClientRect();
+        if (rect.bottom > window.innerHeight) {
+          el.style.maxHeight = `${window.innerHeight - 20}px`;
+          el.style.overflowY = 'auto';
+        }
+      }
+    });
+  }
+  
+  // Check viewport fit on resize
+  window.addEventListener('resize', ensureViewportFit);
+  window.addEventListener('orientationchange', () => {
+    setTimeout(ensureViewportFit, 200);
+  });
+
+/* --------------------------
+   Small utilities
+   -------------------------- */
+function fadeOut(audioEl, duration=800){
+  if (!audioEl || audioEl.paused) return;
+  const startVolume = audioEl.volume;
+  const startTime = performance.now();
+  
+  function updateVolume() {
+    const elapsed = performance.now() - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    audioEl.volume = Math.max(0, startVolume * (1 - progress));
+    
+    if (progress < 1) {
+      requestAnimationFrame(updateVolume);
+    } else {
+      audioEl.pause();
+      audioEl.volume = 0.30; // reset for next time
+    }
+  }
+  requestAnimationFrame(updateVolume);
+}
+
+function fadeIn(audioEl, targetVolume, duration=400){
+  if (!audioEl) return;
+  const startTime = performance.now();
+  audioEl.volume = 0;
+  
+  function updateVolume() {
+    const elapsed = performance.now() - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    audioEl.volume = Math.min(targetVolume, targetVolume * progress);
+    
+    if (progress < 1) {
+      requestAnimationFrame(updateVolume);
+    }
+  }
+  requestAnimationFrame(updateVolume);
+}
+
+function fadeInVideo(videoEl, targetVolume, duration=2000){
+  const step = 50;
+  const steps = Math.max(1, Math.floor(duration/step));
+  const volStep = targetVolume / steps;
+  videoEl.volume = 0;
+  const iv = setInterval(()=>{
+    videoEl.volume = Math.min(targetVolume, videoEl.volume + volStep);
+    if(videoEl.volume >= targetVolume - 0.01){
+      clearInterval(iv);
+    }
+  }, step);
+}
+
+function enableGameBoxes(){
+  gameBoxes.forEach(g => g.classList.remove('disabled'));
+  gamesEnabled = true;
+}
+
+/* --------------------------
+   Psyche speech flow
+   -------------------------- */
+function showSaikiSpeech(text, audioDuration = 6000, cb, triangleDelay = null, skipDefaultAudio = false, fadeInAudio = false, game3Mode = false, game4Mode = false, centerMode = false){
+  // Smooth fade in for dim overlay
+  dimOverlay.style.display = 'block';
+  dimOverlay.style.pointerEvents = 'auto';
+  requestAnimationFrame(() => {
+    dimOverlay.classList.add('show');
+  });
+  
+  // Apply 40% opacity dim for Game 3/4 so game is visible beneath
+  if (game3Mode || crossyGameContainer.style.display === 'block') {
+    dimOverlay.classList.add('game3Mode');
+    dimOverlay.classList.remove('game4Mode');
+  } else if (game4Mode || snakeGameContainer.style.display === 'block') {
+    dimOverlay.classList.add('game4Mode');
+    dimOverlay.classList.remove('game3Mode');
+  } else {
+    dimOverlay.classList.remove('game3Mode');
+    dimOverlay.classList.remove('game4Mode');
+  }
+  
+  // Position overlay - center mode for Game 3/4, bottom for others
+  if (centerMode || game3Mode || game4Mode) {
+    psycheOverlay.classList.remove('bottomMode');
+  } else {
+    psycheOverlay.classList.add('bottomMode');
+  }
+  
+  // Smooth fade in for psyche overlay
+  psycheOverlay.setAttribute('aria-hidden','false');
+  psycheText.textContent = text;
+  psycheTriangle.style.opacity = 0;
+  psycheTriangle.style.transition = 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+  psycheReady = false;
+  
+  requestAnimationFrame(() => {
+    psycheOverlay.classList.add('show');
+  });
+
+  // play audio from start (unless skipped for custom audio like Game 3)
+  if (!skipDefaultAudio) {
+    psycheAudio.pause();
+    psycheAudio.currentTime = 0;
+    if (fadeInAudio) {
+      psycheAudio.volume = 0;
+      fadeIn(psycheAudio, 0.30, 500);
+    } else {
+      psycheAudio.volume = 0.30;
+    }
+    psycheAudio.play().catch(()=>{ /* ignore autoplay errors */ });
+  }
+
+  // show triangle (and allow clicking) - use custom delay if provided, otherwise slightly before audio ends
+  const delay = triangleDelay !== null ? triangleDelay : Math.max(600, audioDuration - 700);
+  setTimeout(()=>{
+    psycheTriangle.style.opacity = 1;
+    psycheReady = true;
+  }, delay);
+
+  // auto fade audio near end, do callback after done
+  setTimeout(()=>{
+    if (!skipDefaultAudio) fadeOut(psycheAudio, 700);
+    if (cb) cb();
+  }, audioDuration);
+}
+
+function hideSaikiSpeech(){
+  // only hide if triangle already shown (defensive)
+  if(!psycheReady) return;
+  
+  // Smooth fade out
+  psycheTriangle.style.opacity = 0;
+  psycheOverlay.classList.remove('show');
+  psycheOverlay.classList.remove('bottomMode');
+  psycheOverlay.setAttribute('aria-hidden','true');
+  
+  dimOverlay.classList.remove('show');
+  setTimeout(() => {
+    dimOverlay.style.display = 'none';
+    dimOverlay.style.pointerEvents = 'none';
+  }, 400); // Wait for fade out transition
+  
+  dimOverlay.classList.remove('game3Mode'); // Remove game3 mode when closing
+  dimOverlay.classList.remove('game4Mode'); // Remove game4 mode when closing
+  if(!psycheAudio.paused) fadeOut(psycheAudio, 400);
+  
+  // Check for Game 3 start callback
+  if(window._game3StartCallback){
+    window._game3StartCallback();
+    return;
+  }
+
+  // if we should redirect to menu (after game completion)
+  if(shouldRedirectToMenu){
+    shouldRedirectToMenu = false;
+    // Hide any game containers and show main menu
+    quizContainer.style.display = 'none';
+    puzzleContainer.style.display = 'none';
+    crossyGameContainer.style.display = 'none';
+    snakeGameContainer.style.display = 'none';
+    snakeGameScore.style.display = 'none';
+    backButton.style.display = 'none';
+    boxContainer.style.display = 'grid';
+    boxContainer.style.opacity = 1;
+    boxContainer.style.transform = 'scale(1)';
+    mainScreen.classList.add('visible');
+    return;
+  }
+
+  // now enable games (only if not redirecting)
+  enableGameBoxes();
+}
+
+/* When overlay clicked only allow closing when triangle visible - with touch support */
+const psycheClickHandler = () => {
+  if(psycheReady) hideSaikiSpeech();
+};
+psycheOverlay.addEventListener('click', psycheClickHandler);
+psycheOverlay.addEventListener('touchend', (e) => {
+  e.preventDefault();
+  psycheClickHandler();
+}, { passive: false });
+
+dimOverlay.addEventListener('click', psycheClickHandler);
+dimOverlay.addEventListener('touchend', (e) => {
+  e.preventDefault();
+  psycheClickHandler();
+}, { passive: false });
+
+/* --------------------------
+   Start button flow
+   -------------------------- */
+const startButtonHandler = () => {
+  // hide button and show loading bar
+  startButton.style.display = 'none';
+  loadingBarContainer.style.display = 'block';
+  loadingBar.style.width = '0%';
+  // animate load bar to 100% in 1800ms
+  setTimeout(()=> loadingBar.style.width = '100%', 60);
+  
+  // Fade out clairdelune audio BEFORE loading bar reaches 100% (around 1200ms into loading)
+  clairdeluneAudio.loop = false;
+  setTimeout(() => {
+    fadeOut(clairdeluneAudio, 600);
+    clairdelunePlaying = false;
+  }, 1200); // Fade out at 1200ms, before 1800ms completion
+
+  // after load, change body to purple and show main screen and Psyche speech
+  setTimeout(()=>{
+    startPage.style.display = 'none';
+    body.classList.remove('startOrange');
+    body.classList.add('purpleBg');
+    
+    // Hide start screen fluid shapes (using gradient background now)
+    const startFluids = document.getElementById('fluidShapesContainer');
+    const redPurpleFluids = document.getElementById('redPurpleFluidsContainer');
+    if(startFluids) startFluids.style.display = 'none';
+    if(redPurpleFluids) redPurpleFluids.style.display = 'none';
+
+    // reveal main screen but keep boxes disabled until Psyche speech ends
+    mainScreen.classList.add('visible');
+    mainScreen.setAttribute('aria-hidden','false');
+    boxContainer.style.display = 'grid';
+
+    // ensure boxes hidden visually until we animate them in
+    gameBoxes.forEach(b=>{
+      b.style.opacity = 0;
+      b.style.transform = 'scale(.98)';
+    });
+
+    // animate boxes in (they will still be disabled until speech closes)
+    gameBoxes.forEach((el,i)=>{
+      setTimeout(()=>{ 
+        el.style.transition = 'opacity 0.25s ease-out, transform 0.25s ease-out'; 
+        el.style.opacity=1; 
+        el.style.transform='scale(1)'; 
+      }, i*150 + 200); // Faster, smoother animation
+    });
+
+    // Ensure back button is hidden on main menu
+    backButton.style.display = 'none';
+    
+    // play psyche speech with fade-in audio and only allow clicking to dismiss after triangle (psycheReady)
+    showSaikiSpeech("So, Begum. You have to win and complete all four games to unlock my amazing 5000 word essay on you", 8000, ()=>{
+      // callback after speech finished playing (but we keep it open until user clicks the overlay)
+      // we don't enable games automatically — we enable them when user dismisses Psyche (per your request)
+    }, 1000, false, true); // fadeInAudio = true
+  }, 2200);
+};
+
+startButton.addEventListener('click', startButtonHandler);
+startButton.addEventListener('touchend', (e) => {
+  e.preventDefault();
+  startButtonHandler();
+}, { passive: false });
+
+/* --------------------------
+   Back button
+   -------------------------- */
+const backButtonHandler = () => {
+  // Cleanup Snake game if active
+  if(window._snakeGameCleanup) window._snakeGameCleanup();
+  
+  // CRITICAL: Ensure death video is stopped and hidden when leaving any game
+  if (deathVideoOverlay) {
+    deathVideoOverlay.style.display = 'none';
+    deathVideoOverlay.style.opacity = '0';
+  }
+  if (deathVideo) {
+    deathVideo.pause();
+    deathVideo.currentTime = 0;
+  }
+  
+  // Smooth transition out for all containers
+  puzzleContainer.classList.remove('show');
+  quizContainer.classList.remove('show');
+  crossyGameContainer.classList.remove('show');
+  snakeGameContainer.classList.remove('show');
+  backButton.classList.remove('show');
+  
+  setTimeout(() => {
+    // hide game screens
+    puzzleContainer.style.display = 'none';
+    quizContainer.style.display = 'none';
+    crossyGameContainer.style.display = 'none';
+    snakeGameContainer.style.display = 'none';
+    snakeGameScore.style.display = 'none';
+    
+    // Ensure death video is definitely hidden
+    if (deathVideoOverlay) {
+      deathVideoOverlay.style.display = 'none';
+      deathVideoOverlay.style.opacity = '0';
+    }
+    if (deathVideo) {
+      deathVideo.pause();
+      deathVideo.currentTime = 0;
+    }
+    
+    // restore menu with smooth animation
+    boxContainer.style.display = 'grid';
+    boxContainer.style.opacity = '0';
+    boxContainer.style.transform = 'scale(0.98)';
+    requestAnimationFrame(() => {
+      boxContainer.style.opacity = '1';
+      boxContainer.style.transform = 'scale(1)';
+    });
+    backButton.style.display = 'none';
+    mainScreen.classList.add('visible');
+  }, 400);
+};
+
+backButton.addEventListener('click', backButtonHandler);
+backButton.addEventListener('touchend', (e) => {
+  e.preventDefault();
+  backButtonHandler();
+}, { passive: false });
+
+/* --------------------------
+   QUIZ (Game 1)
+   -------------------------- */
+const quizQuestions = [
+  { q: "1. What is Azhan's lucky numbers?", options:["5143","09","01"], correct:0 },
+  { q: "2. What date did i start to really like you?", options:["7 August","11 August","19 August","4 August"], correct:1 },
+  { q: "3. Who is Rufia's best cat?", options:["Pinky","Mishti","KING SNOOPYYYYYY","Miffy"], correct:2, special:{audio:'turnmyswagon', text:'AYYYYYYYYYYY'} },
+  { q: "4. What is Azhan's favourite song oat?", options:["Sunflower - Post Malone , Swae Lee","AEAO - Dynamic Duo , DJ Premier","SLOW DANCING IN THE DARK - Joji","Wish - Diplo , Trippie Redd","Clair de Lune - Claude Debussy"], correct:0 }
+];
+let currentQuestion = 0;
+
+function renderQuestion(){
+  quizContainer.innerHTML = '';
+  quizContainer.style.display = 'block';
+  quizContainer.classList.add('relative');
+  quizContainer.setAttribute('aria-hidden','false');
+  backButton.style.display = 'block';
+  requestAnimationFrame(() => {
+    quizContainer.classList.add('show');
+    backButton.classList.add('show');
+  });
+  
+  // Ensure popup is positioned correctly (fixed position, not relative to quiz container)
+  if(psychePopup.parentNode) psychePopup.parentNode.removeChild(psychePopup);
+  document.body.appendChild(psychePopup);
+  // Reset popup position (will be set when showing)
+  psychePopup.style.top = '';
+  psychePopup.style.left = '50%';
+  psychePopup.style.transform = 'translateX(-50%) translateY(-10px)';
+
+  const q = quizQuestions[currentQuestion];
+  const qEl = document.createElement('div'); qEl.className = 'quizQuestion'; qEl.textContent = q.q; quizContainer.appendChild(qEl);
+
+  const optsWrap = document.createElement('div'); optsWrap.className = 'quizOptions'; quizContainer.appendChild(optsWrap);
+
+  q.options.forEach((opt, idx) => {
+    const b = document.createElement('button'); b.className = 'quizOption'; b.type = 'button'; b.textContent = opt;
+    const quizOptionHandler = () => {
+      if(idx === q.correct){
+        b.classList.add('correct');
+        if(q.special && q.special.audio === 'turnmyswagon'){
+          // Position popup above quiz container (fixed position)
+          const quizRect = quizContainer.getBoundingClientRect();
+          const popupHeight = 120; // Approximate popup height
+          const topPosition = Math.max(20, quizRect.top - popupHeight - 20);
+          psychePopup.style.top = `${topPosition}px`;
+          psychePopup.style.left = '50%';
+          psychePopup.style.transform = 'translateX(-50%) translateY(-10px)';
+          
+          // Show Psyche popup above question box
+          psychePopupText.textContent = 'AYYYYY';
+          psychePopup.classList.add('show');
+          psychePopup.setAttribute('aria-hidden','false');
+          
+          // Play bagsxdaddy audio with fade in/out at 40% volume
+          bagsxdaddyAudio.currentTime = 0;
+          bagsxdaddyAudio.volume = 0;
+          bagsxdaddyAudio.play().catch(()=>{});
+          
+          // Fade in over 300ms
+          fadeIn(bagsxdaddyAudio, 0.4, 300);
+          
+          // Auto-dismiss after exactly 1.5 seconds with smooth fade out
+          setTimeout(()=> {
+            fadeOut(bagsxdaddyAudio, 400);
+            psychePopup.style.transition = 'opacity 0.4s ease-out, transform 0.4s ease-out';
+            psychePopup.style.opacity = '0';
+            setTimeout(()=> {
+              psychePopup.classList.remove('show');
+              psychePopup.setAttribute('aria-hidden','true');
+              psychePopup.style.top = '';
+              psychePopup.style.left = '';
+              psychePopup.style.transform = '';
+              bagsxdaddyAudio.pause();
+              bagsxdaddyAudio.volume = 0.9; // reset volume
+            }, 400);
+          }, 1500);
+        }
+        setTimeout(()=>{
+          currentQuestion++;
+          if(currentQuestion < quizQuestions.length){
+            renderQuestion();
+          } else {
+            // quiz complete - mark game1 complete and return to menu after short animation
+            quizContainer.innerHTML = '<div style="color:#fff;font-size:20px;text-align:center">Quiz Complete! 4/4</div>';
+            completeGame1();
+          }
+        }, 700);
+      } else {
+        b.classList.add('wrong');
+        setTimeout(()=> b.classList.remove('wrong'), 650);
+      }
+    };
+    b.addEventListener('click', quizOptionHandler);
+    b.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      quizOptionHandler();
+    }, { passive: false });
+    optsWrap.appendChild(b);
+  });
+}
+
+function completeGame1(){
+  // Mark game 1 completed visually first
+  markGameCompleted('game1');
+  
+  // Keep quiz container visible - overlay will appear on top
+  backButton.style.display = 'none';
+  
+  // Play completion audio (saikiOST.mp3 only - skip default psycheAudio)
+  game1CompletionAudio.currentTime = 0;
+  game1CompletionAudio.volume = 0.30;
+  game1CompletionAudio.play().catch(()=>{});
+  
+  // Show Saiki speech - just "Congratulations." (skip default audio to avoid conflict)
+  // Wait for user click before redirecting
+  shouldRedirectToMenu = true; // set flag to redirect after speech closes
+  showSaikiSpeech("Congratulations.", 2500, ()=>{
+    // after speech duration we still wait for user to click Psyche to dismiss
+    fadeOut(game1CompletionAudio, 700);
+  }, 1000, true); // skipDefaultAudio = true to prevent saiki theme sound.mp3 from playing
+}
+
+/* Helper function for smooth game transitions */
+function showGameContainer(container, callback) {
+  boxContainer.style.opacity = '0';
+  boxContainer.style.transform = 'scale(0.98)';
+  setTimeout(() => {
+    boxContainer.style.display = 'none';
+    if (callback) callback();
+    container.style.display = container === quizContainer ? 'block' : 'grid';
+    requestAnimationFrame(() => {
+      container.classList.add('show');
+      if (container === backButton) {
+        backButton.classList.add('show');
+      }
+    });
+  }, 350);
+}
+
+function hideGameContainer(container, callback) {
+  container.classList.remove('show');
+  if (container === backButton) {
+    backButton.classList.remove('show');
+  }
+  setTimeout(() => {
+    container.style.display = 'none';
+    boxContainer.style.display = 'grid';
+    boxContainer.style.opacity = '0';
+    boxContainer.style.transform = 'scale(0.98)';
+    requestAnimationFrame(() => {
+      boxContainer.style.opacity = '1';
+      boxContainer.style.transform = 'scale(1)';
+      if (callback) callback();
+    });
+  }, 400);
+}
+
+/* attach game1 click (opens quiz) - with touch support */
+const game1Handler = () => {
+  if(!gamesEnabled) return;
+  const game1El = document.getElementById('game1');
+  if(game1El.classList.contains('completed')) return;
+  currentQuestion = 0;
+  renderQuestion();
+  showGameContainer(quizContainer);
+};
+document.getElementById('game1').addEventListener('click', game1Handler);
+document.getElementById('game1').addEventListener('touchend', (e) => {
+  e.preventDefault();
+  game1Handler();
+}, { passive: false });
+
+/* --------------------------
+   Sliding puzzle (Game 2) - corrected logic
+   -------------------------- */
+function startSlidingPuzzle(imgSrc='mishti.jpg', size=3){
+  puzzleContainer.innerHTML = '';
+  puzzleContainer.style.display = 'grid';
+  puzzleContainer.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+  puzzleContainer.style.gridTemplateRows = `repeat(${size}, 1fr)`;
+  puzzleContainer.setAttribute('aria-hidden','false');
+  backButton.style.display = 'block';
+  requestAnimationFrame(() => {
+    puzzleContainer.classList.add('show');
+    backButton.classList.add('show');
+  });
+
+  // internal representation: an array of tile objects (including the empty tile)
+  const tiles = [];
+  let empty = { r: size - 1, c: size - 1 }; // empty position
+
+  // create tiles and attach to container
+  for(let r=0; r<size; r++){
+    for(let c=0; c<size; c++){
+      const idx = r*size + c;
+      const el = document.createElement('div');
+      el.style.width = '100%';
+      el.style.height = '100%';
+      el.style.boxSizing = 'border-box';
+      el.style.border = 'none';
+      el.style.backgroundRepeat = 'no-repeat';
+      el.style.backgroundSize = `${size * 100}% ${size * 100}%`;
+      el.style.backgroundPosition = `${(c/(size-1))*100}% ${(r/(size-1))*100}%`;
+      el.dataset.r = r; el.dataset.c = c;
+      // mark the last tile as the empty one
+      if(r === size-1 && c === size-1){
+        el.style.background = 'none';
+        el.classList.add('empty');
+      } else {
+        el.style.backgroundImage = `url(${imgSrc})`;
+      }
+      // grid placement:
+      el.style.gridRowStart = r+1;
+      el.style.gridColumnStart = c+1;
+
+      puzzleContainer.appendChild(el);
+      tiles.push(el);
+    }
+  }
+
+  // helper to get tile at a given r,c
+  function tileAt(r,c){
+    return tiles.find(t => Number(t.dataset.r) === r && Number(t.dataset.c) === c);
+  }
+
+  // movable tiles are those adjacent to the empty cell
+  function getMovableTiles(){
+    const moves = [];
+    const dirs = [{dr:1,dc:0},{dr:-1,dc:0},{dr:0,dc:1},{dr:0,dc:-1}];
+    dirs.forEach(d=>{
+      const nr = empty.r + d.dr;
+      const nc = empty.c + d.dc;
+      if(nr>=0 && nr<size && nc>=0 && nc<size){
+        const t = tileAt(nr,nc);
+        if(t) moves.push(t);
+      }
+    });
+    return moves;
+  }
+
+  // move a tile into the empty spot (swap positions) with smooth animation
+  function moveTile(tileEl){
+    const tr = Number(tileEl.dataset.r), tc = Number(tileEl.dataset.c);
+    // Ensure transition is applied
+    tileEl.style.transition = 'transform .2s ease';
+    // set that tile's dataset to empty position
+    tileEl.dataset.r = empty.r; tileEl.dataset.c = empty.c;
+    tileEl.style.gridRowStart = empty.r + 1;
+    tileEl.style.gridColumnStart = empty.c + 1;
+    // update empty
+    empty.r = tr; empty.c = tc;
+    // update the actual DOM empty tile (visual)
+    const emptyTile = tiles.find(t=>t.classList.contains('empty'));
+    if(emptyTile){
+      emptyTile.dataset.r = empty.r; emptyTile.dataset.c = empty.c;
+      emptyTile.style.gridRowStart = empty.r + 1;
+      emptyTile.style.gridColumnStart = empty.c + 1;
+    }
+  }
+
+  // check if solved
+  function checkWin(){
+    for(let r=0;r<size;r++){
+      for(let c=0;c<size;c++){
+        const idx = r*size + c;
+        const t = tiles[idx];
+        const tr = Number(t.dataset.r), tc = Number(t.dataset.c);
+        if(t.classList.contains('empty')) continue;
+        // in solved state, each tile's dataset should match its original idx
+        if(tr !== Math.floor(idx/size) || tc !== idx % size) return false;
+      }
+    }
+    return true;
+  }
+
+  // click handlers
+  tiles.forEach(t=>{
+    t.addEventListener('click', ()=>{
+      // can't move if it's the empty tile
+      if(t.classList.contains('empty')) return;
+      const movable = getMovableTiles();
+      if(movable.includes(t)){
+        moveTile(t);
+        if(checkWin()){
+          // mark game2 completed
+          markGameCompleted('game2');
+          
+          // Keep puzzle container visible - overlay will appear on top
+          backButton.style.display = 'none';
+          
+          // Play kanye audio
+          kanyeAudio.currentTime = 0;
+          kanyeAudio.volume = 0.9;
+          kanyeAudio.play().catch(()=>{});
+          
+          // Show Saiki speech - "FINALLYYYY" (skip default audio to avoid saiki theme sound.mp3)
+          // Wait for user click before redirecting
+          shouldRedirectToMenu = true; // set flag to redirect after speech closes
+          showSaikiSpeech("FINALLYYYY", 2500, ()=>{
+            // Fade out audio before redirect
+            fadeOut(kanyeAudio, 700);
+          }, 1000, true); // skipDefaultAudio = true to prevent saiki theme sound.mp3 from playing
+        }
+      }
+    });
+  });
+
+  // shuffle by performing many valid moves starting from solved state (keeps solvable)
+  function shuffle(times=200){
+    for(let i=0;i<times;i++){
+      const m = getMovableTiles();
+      const pick = m[Math.floor(Math.random()*m.length)];
+      // do move (no animation required)
+      moveTile(pick);
+    }
+  }
+  shuffle(140);
+}
+
+/* hook Game 2 - with touch support */
+const game2Handler = () => {
+  if(!gamesEnabled) return;
+  const game2El = document.getElementById('game2');
+  if(game2El.classList.contains('completed')) return;
+  startSlidingPuzzle('mishti.jpg', 3);
+  showGameContainer(puzzleContainer);
+};
+document.getElementById('game2').addEventListener('click', game2Handler);
+document.getElementById('game2').addEventListener('touchend', (e) => {
+  e.preventDefault();
+  game2Handler();
+}, { passive: false });
+
+/* --------------------------
+   Crossy Road Game (Game 3) - Three.js Implementation
+   -------------------------- */
+function startCrossyRoad(){
+  // Ensure death video is properly initialized for Game 3 only
+  if (deathVideoOverlay) {
+    deathVideoOverlay.style.display = 'none';
+    deathVideoOverlay.style.opacity = '0';
+  }
+  if (deathVideo) {
+    deathVideo.pause();
+    deathVideo.currentTime = 0;
+    deathVideo.volume = 1.0; // Set volume to 100%
+    deathVideo.muted = false; // Ensure audio is not muted
+  }
+  
+  crossyGameContainer.style.display = 'block';
+  crossyGameContainer.setAttribute('aria-hidden','false');
+  backButton.style.display = 'block';
+  boxContainer.style.display = 'none';
+  // Remove retry button - death sequence handles restart automatically
+  
+  const width = crossyGameContainer.clientWidth;
+  const height = crossyGameContainer.clientHeight;
+  
+  // Clear any existing renderer
+  const existingRenderer = crossyGameContainer.querySelector('canvas');
+  if(existingRenderer) existingRenderer.remove();
+  
+  // Three.js setup
+  const scene = new THREE.Scene();
+  const distance = 500;
+  const camera = new THREE.OrthographicCamera(
+    width / -2, width / 2,
+    height / 2, height / -2,
+    0.1, 10000
+  );
+  camera.rotation.x = (50 * Math.PI) / 180;
+  camera.rotation.y = (20 * Math.PI) / 180;
+  camera.rotation.z = (10 * Math.PI) / 180;
+  const initialCameraPositionY = -Math.tan(camera.rotation.x) * distance;
+  const initialCameraPositionX = Math.tan(camera.rotation.y) * Math.sqrt(distance ** 2 + initialCameraPositionY ** 2);
+  camera.position.y = initialCameraPositionY;
+  camera.position.x = initialCameraPositionX;
+  camera.position.z = distance;
+  
+  const zoom = 2;
+  const chickenSize = 15;
+  const positionWidth = 42;
+  const columns = 17;
+  const boardWidth = positionWidth * columns;
+  const stepTime = 120; // Milliseconds for step animation (optimized for 60fps)
+  
+  // Game state
+  let lanes;
+  let currentLane = 0;
+  let currentColumn = Math.floor(columns / 2);
+  let previousTimestamp = null;
+  let startMoving = false;
+  let moves = [];
+  let stepStartTimestamp;
+  let animationId = null;
+  let gameActive = true;
+  
+  // Vehicle textures
+  const carFrontTexture = new Texture(40, 80, [{ x: 0, y: 10, w: 30, h: 60 }]);
+  const carBackTexture = new Texture(40, 80, [{ x: 10, y: 10, w: 30, h: 60 }]);
+  const carRightSideTexture = new Texture(110, 40, [{ x: 10, y: 0, w: 50, h: 30 }, { x: 70, y: 0, w: 30, h: 30 }]);
+  const carLeftSideTexture = new Texture(110, 40, [{ x: 10, y: 10, w: 50, h: 30 }, { x: 70, y: 10, w: 30, h: 30 }]);
+  const truckFrontTexture = new Texture(30, 30, [{ x: 15, y: 0, w: 10, h: 30 }]);
+  const truckRightSideTexture = new Texture(25, 30, [{ x: 0, y: 15, w: 10, h: 10 }]);
+  const truckLeftSideTexture = new Texture(25, 30, [{ x: 0, y: 5, w: 10, h: 10 }]);
+  
+  const laneTypes = ["car", "truck", "forest"];
+  const laneSpeeds = [2, 2.5, 3];
+  const vechicleColors = [0x7b2ff7]; // All vehicles are purple
+  const threeHeights = [20, 45, 60];
+  
+  // Three.js Helper Functions
+  function Texture(width, height, rects) {
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext("2d");
+    context.fillStyle = "#ffffff";
+    context.fillRect(0, 0, width, height);
+    context.fillStyle = "rgba(0,0,0,0.6)";
+    rects.forEach((rect) => {
+      context.fillRect(rect.x, rect.y, rect.w, rect.h);
+    });
+    return new THREE.CanvasTexture(canvas);
+  }
+  
+  function Wheel() {
+    const wheel = new THREE.Mesh(
+      new THREE.BoxBufferGeometry(12 * zoom, 33 * zoom, 12 * zoom),
+      new THREE.MeshLambertMaterial({ color: 0x333333, flatShading: true })
+    );
+    wheel.position.z = 6 * zoom;
+    return wheel;
+  }
+  
+  function Car() {
+    const car = new THREE.Group();
+    const color = 0x7b2ff7; // Purple
+    const main = new THREE.Mesh(
+      new THREE.BoxBufferGeometry(60 * zoom, 30 * zoom, 15 * zoom),
+      new THREE.MeshPhongMaterial({ color, flatShading: true })
+    );
+    main.position.z = 12 * zoom;
+    main.castShadow = true;
+    main.receiveShadow = true;
+    car.add(main);
+    
+    const cabin = new THREE.Mesh(
+      new THREE.BoxBufferGeometry(33 * zoom, 24 * zoom, 12 * zoom),
+      [
+        new THREE.MeshPhongMaterial({ color: 0xcccccc, flatShading: true, map: carBackTexture }),
+        new THREE.MeshPhongMaterial({ color: 0xcccccc, flatShading: true, map: carFrontTexture }),
+        new THREE.MeshPhongMaterial({ color: 0xcccccc, flatShading: true, map: carRightSideTexture }),
+        new THREE.MeshPhongMaterial({ color: 0xcccccc, flatShading: true, map: carLeftSideTexture }),
+        new THREE.MeshPhongMaterial({ color: 0xcccccc, flatShading: true }),
+        new THREE.MeshPhongMaterial({ color: 0xcccccc, flatShading: true })
+      ]
+    );
+    cabin.position.x = 6 * zoom;
+    cabin.position.z = 25.5 * zoom;
+    cabin.castShadow = true;
+    cabin.receiveShadow = true;
+    car.add(cabin);
+    
+    const frontWheel = new Wheel();
+    frontWheel.position.x = -18 * zoom;
+    car.add(frontWheel);
+    const backWheel = new Wheel();
+    backWheel.position.x = 18 * zoom;
+    car.add(backWheel);
+    car.castShadow = true;
+    car.receiveShadow = false;
+    return car;
+  }
+  
+  function Truck() {
+    const truck = new THREE.Group();
+    const color = 0x7b2ff7; // Purple
+    const base = new THREE.Mesh(
+      new THREE.BoxBufferGeometry(100 * zoom, 25 * zoom, 5 * zoom),
+      new THREE.MeshLambertMaterial({ color: 0xb4c6fc, flatShading: true })
+    );
+    base.position.z = 10 * zoom;
+    truck.add(base);
+    
+    const cargo = new THREE.Mesh(
+      new THREE.BoxBufferGeometry(75 * zoom, 35 * zoom, 40 * zoom),
+      new THREE.MeshPhongMaterial({ color: 0xb4c6fc, flatShading: true })
+    );
+    cargo.position.x = 15 * zoom;
+    cargo.position.z = 30 * zoom;
+    cargo.castShadow = true;
+    cargo.receiveShadow = true;
+    truck.add(cargo);
+    
+    const cabin = new THREE.Mesh(
+      new THREE.BoxBufferGeometry(25 * zoom, 30 * zoom, 30 * zoom),
+      [
+        new THREE.MeshPhongMaterial({ color, flatShading: true }),
+        new THREE.MeshPhongMaterial({ color, flatShading: true, map: truckFrontTexture }),
+        new THREE.MeshPhongMaterial({ color, flatShading: true, map: truckRightSideTexture }),
+        new THREE.MeshPhongMaterial({ color, flatShading: true, map: truckLeftSideTexture }),
+        new THREE.MeshPhongMaterial({ color, flatShading: true }),
+        new THREE.MeshPhongMaterial({ color, flatShading: true })
+      ]
+    );
+    cabin.position.x = -40 * zoom;
+    cabin.position.z = 20 * zoom;
+    cabin.castShadow = true;
+    cabin.receiveShadow = true;
+    truck.add(cabin);
+    
+    const frontWheel = new Wheel();
+    frontWheel.position.x = -38 * zoom;
+    truck.add(frontWheel);
+    const middleWheel = new Wheel();
+    middleWheel.position.x = -10 * zoom;
+    truck.add(middleWheel);
+    const backWheel = new Wheel();
+    backWheel.position.x = 30 * zoom;
+    truck.add(backWheel);
+    return truck;
+  }
+  
+  function Three() {
+    const three = new THREE.Group();
+    const trunk = new THREE.Mesh(
+      new THREE.BoxBufferGeometry(15 * zoom, 15 * zoom, 20 * zoom),
+      new THREE.MeshPhongMaterial({ color: 0x4d2926, flatShading: true })
+    );
+    trunk.position.z = 10 * zoom;
+    trunk.castShadow = true;
+    trunk.receiveShadow = true;
+    three.add(trunk);
+    
+    const height = threeHeights[Math.floor(Math.random() * threeHeights.length)];
+    const crown = new THREE.Mesh(
+      new THREE.BoxBufferGeometry(30 * zoom, 30 * zoom, height * zoom),
+      new THREE.MeshLambertMaterial({ color: 0x7aa21d, flatShading: true })
+    );
+    crown.position.z = (height / 2 + 20) * zoom;
+    crown.castShadow = true;
+    crown.receiveShadow = false;
+    three.add(crown);
+    return three;
+  }
+  
+  function Chicken() {
+    // Bread loaf player
+    const chicken = new THREE.Group();
+    
+    // Main bread body (rounded rectangular shape)
+    const body = new THREE.Mesh(
+      new THREE.BoxBufferGeometry(chickenSize * zoom, chickenSize * zoom * 0.8, 18 * zoom),
+      new THREE.MeshPhongMaterial({ color: 0xd4a574, flatShading: true }) // Light brown bread
+    );
+    body.position.z = 9 * zoom;
+    body.castShadow = true;
+    body.receiveShadow = true;
+    chicken.add(body);
+    
+    // Top crust (darker brown)
+    const topCrust = new THREE.Mesh(
+      new THREE.BoxBufferGeometry(chickenSize * zoom * 0.9, chickenSize * zoom * 0.3, 16 * zoom),
+      new THREE.MeshPhongMaterial({ color: 0xb8865a, flatShading: true }) // Darker brown crust
+    );
+    topCrust.position.y = chickenSize * zoom * 0.3;
+    topCrust.position.z = 9 * zoom;
+    topCrust.castShadow = true;
+    topCrust.receiveShadow = false;
+    chicken.add(topCrust);
+    
+    // Simple face - eyes
+    const leftEye = new THREE.Mesh(
+      new THREE.BoxBufferGeometry(2 * zoom, 2 * zoom, 1 * zoom),
+      new THREE.MeshLambertMaterial({ color: 0x000000, flatShading: true })
+    );
+    leftEye.position.x = -3 * zoom;
+    leftEye.position.y = 2 * zoom;
+    leftEye.position.z = 10 * zoom;
+    chicken.add(leftEye);
+    
+    const rightEye = new THREE.Mesh(
+      new THREE.BoxBufferGeometry(2 * zoom, 2 * zoom, 1 * zoom),
+      new THREE.MeshLambertMaterial({ color: 0x000000, flatShading: true })
+    );
+    rightEye.position.x = 3 * zoom;
+    rightEye.position.y = 2 * zoom;
+    rightEye.position.z = 10 * zoom;
+    chicken.add(rightEye);
+    
+    // Simple face - mouth
+    const mouth = new THREE.Mesh(
+      new THREE.BoxBufferGeometry(4 * zoom, 1.5 * zoom, 1 * zoom),
+      new THREE.MeshLambertMaterial({ color: 0x000000, flatShading: true })
+    );
+    mouth.position.y = -2 * zoom;
+    mouth.position.z = 10 * zoom;
+    chicken.add(mouth);
+    
+    return chicken;
+  }
+  
+  function Road() {
+    const road = new THREE.Group();
+    const createSection = (color) => new THREE.Mesh(
+      new THREE.PlaneBufferGeometry(boardWidth * zoom, positionWidth * zoom),
+      new THREE.MeshPhongMaterial({ color })
+    );
+    const middle = createSection(0x454a59); // Normal asphalt gray
+    middle.receiveShadow = true;
+    road.add(middle);
+    const left = createSection(0x393d49); // Normal darker gray
+    left.position.x = -boardWidth * zoom;
+    road.add(left);
+    const right = createSection(0x393d49); // Normal darker gray
+    right.position.x = boardWidth * zoom;
+    road.add(right);
+    return road;
+  }
+  
+  function Grass() {
+    const grass = new THREE.Group();
+    const createSection = (color) => new THREE.Mesh(
+      new THREE.BoxBufferGeometry(boardWidth * zoom, positionWidth * zoom, 3 * zoom),
+      new THREE.MeshPhongMaterial({ color })
+    );
+    const middle = createSection(0xbaf455);
+    middle.receiveShadow = true;
+    grass.add(middle);
+    const left = createSection(0x99c846);
+    left.position.x = -boardWidth * zoom;
+    grass.add(left);
+    const right = createSection(0x99c846);
+    right.position.x = boardWidth * zoom;
+    grass.add(right);
+    grass.position.z = 1.5 * zoom;
+    return grass;
+  }
+  
+  function Lane(index) {
+    this.index = index;
+    this.type = index <= 0 ? "field" : laneTypes[Math.floor(Math.random() * laneTypes.length)];
+    
+    switch (this.type) {
+      case "field": {
+        this.type = "field";
+        this.mesh = new Grass();
+        break;
+      }
+      case "forest": {
+        this.mesh = new Grass();
+        this.occupiedPositions = new Set();
+        this.threes = [1, 2, 3, 4].map(() => {
+          const three = new Three();
+          let position;
+          do {
+            position = Math.floor(Math.random() * columns);
+          } while (this.occupiedPositions.has(position));
+          this.occupiedPositions.add(position);
+          three.position.x = (position * positionWidth + positionWidth / 2) * zoom - (boardWidth * zoom) / 2;
+          this.mesh.add(three);
+          return three;
+        });
+        break;
+      }
+      case "car": {
+        this.mesh = new Road();
+        this.direction = Math.random() >= 0.5;
+        const occupiedPositions = new Set();
+        this.vechicles = [1, 2, 3].map(() => {
+          const vechicle = new Car();
+          let position;
+          do {
+            position = Math.floor((Math.random() * columns) / 2);
+          } while (occupiedPositions.has(position));
+          occupiedPositions.add(position);
+          vechicle.position.x = (position * positionWidth * 2 + positionWidth / 2) * zoom - (boardWidth * zoom) / 2;
+          if (!this.direction) vechicle.rotation.z = Math.PI;
+          this.mesh.add(vechicle);
+          return vechicle;
+        });
+        this.speed = laneSpeeds[Math.floor(Math.random() * laneSpeeds.length)];
+        break;
+      }
+      case "truck": {
+        this.mesh = new Road();
+        this.direction = Math.random() >= 0.5;
+        const occupiedPositions = new Set();
+        this.vechicles = [1, 2].map(() => {
+          const vechicle = new Truck();
+          let position;
+          do {
+            position = Math.floor((Math.random() * columns) / 3);
+          } while (occupiedPositions.has(position));
+          occupiedPositions.add(position);
+          vechicle.position.x = (position * positionWidth * 3 + positionWidth / 2) * zoom - (boardWidth * zoom) / 2;
+          if (!this.direction) vechicle.rotation.z = Math.PI;
+          this.mesh.add(vechicle);
+          return vechicle;
+        });
+        this.speed = laneSpeeds[Math.floor(Math.random() * laneSpeeds.length)];
+        break;
+      }
+    }
+  }
+  
+  const generateLanes = () => [-9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    .map((index) => {
+      const lane = new Lane(index);
+      lane.mesh.position.y = index * positionWidth * zoom;
+      scene.add(lane.mesh);
+      return lane;
+    })
+    .filter((lane) => lane.index >= 0);
+  
+  const addLane = () => {
+    const index = lanes.length;
+    const lane = new Lane(index);
+    lane.mesh.position.y = index * positionWidth * zoom;
+    scene.add(lane.mesh);
+    lanes.push(lane);
+  };
+  
+  const chicken = new Chicken();
+  scene.add(chicken);
+  
+  const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.6);
+  scene.add(hemiLight);
+  const initialDirLightPositionX = -100;
+  const initialDirLightPositionY = -100;
+  const dirLight = new THREE.DirectionalLight(0xffffff, 0.6);
+  dirLight.position.set(initialDirLightPositionX, initialDirLightPositionY, 200);
+  dirLight.castShadow = true;
+  dirLight.target = chicken;
+  scene.add(dirLight);
+  dirLight.shadow.mapSize.width = 2048;
+  dirLight.shadow.mapSize.height = 2048;
+  const d = 500;
+  dirLight.shadow.camera.left = -d;
+  dirLight.shadow.camera.right = d;
+  dirLight.shadow.camera.top = d;
+  dirLight.shadow.camera.bottom = -d;
+  
+  const backLight = new THREE.DirectionalLight(0x000000, 0.4);
+  backLight.position.set(200, 200, 50);
+  backLight.castShadow = true;
+  scene.add(backLight);
+  
+  const initaliseValues = () => {
+    lanes = generateLanes();
+    currentLane = 0;
+    currentColumn = Math.floor(columns / 2);
+    previousTimestamp = null;
+    startMoving = false;
+    moves = [];
+    stepStartTimestamp = null;
+    gameActive = true;
+    chicken.position.x = 0;
+    chicken.position.y = 0;
+    camera.position.y = initialCameraPositionY;
+    camera.position.x = initialCameraPositionX;
+    dirLight.position.x = initialDirLightPositionX;
+    dirLight.position.y = initialDirLightPositionY;
+    crossyGameScore.textContent = '0';
+  };
+  
+  initaliseValues();
+  
+  const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: "high-performance" });
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.setSize(width, height);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Optimize for performance
+  crossyGameContainer.appendChild(renderer.domElement);
+  
+  // Handle window resize and orientation change for Game 3
+  function handleResize() {
+    if (crossyGameContainer.style.display !== 'block') return;
+    const newWidth = crossyGameContainer.clientWidth;
+    const newHeight = crossyGameContainer.clientHeight;
+    if (newWidth !== width || newHeight !== height) {
+      width = newWidth;
+      height = newHeight;
+      camera.left = width / -2;
+      camera.right = width / 2;
+      camera.top = height / 2;
+      camera.bottom = height / -2;
+      camera.updateProjectionMatrix();
+      renderer.setSize(width, height);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    }
+  }
+  window.addEventListener('resize', handleResize);
+  window.addEventListener('orientationchange', () => {
+    setTimeout(handleResize, 100); // Delay for orientation change to complete
+  });
+  
+  // Movement function (optimized for immediate response)
+  function move(direction) {
+    // Calculate final position after all queued moves
+    const finalPositions = moves.reduce((position, move) => {
+      if (move === "forward") return { lane: position.lane + 1, column: position.column };
+      if (move === "backward") return { lane: position.lane - 1, column: position.column };
+      if (move === "left") return { lane: position.lane, column: position.column - 1 };
+      if (move === "right") return { lane: position.lane, column: position.column + 1 };
+      return position;
+    }, { lane: currentLane, column: currentColumn });
+    
+    // Validate move immediately
+    if (direction === "forward") {
+      if (lanes[finalPositions.lane + 1] && lanes[finalPositions.lane + 1].type === "forest" && 
+          lanes[finalPositions.lane + 1].occupiedPositions && 
+          lanes[finalPositions.lane + 1].occupiedPositions.has(finalPositions.column)) return;
+      if (!stepStartTimestamp) startMoving = true;
+      addLane();
+    } else if (direction === "backward") {
+      if (finalPositions.lane === 0) return;
+      if (lanes[finalPositions.lane - 1] && lanes[finalPositions.lane - 1].type === "forest" && 
+          lanes[finalPositions.lane - 1].occupiedPositions && 
+          lanes[finalPositions.lane - 1].occupiedPositions.has(finalPositions.column)) return;
+      if (!stepStartTimestamp) startMoving = true;
+    } else if (direction === "left") {
+      if (finalPositions.column === 0) return;
+      if (lanes[finalPositions.lane] && lanes[finalPositions.lane].type === "forest" && 
+          lanes[finalPositions.lane].occupiedPositions && 
+          lanes[finalPositions.lane].occupiedPositions.has(finalPositions.column - 1)) return;
+      if (!stepStartTimestamp) startMoving = true;
+    } else if (direction === "right") {
+      if (finalPositions.column === columns - 1) return;
+      if (lanes[finalPositions.lane] && lanes[finalPositions.lane].type === "forest" && 
+          lanes[finalPositions.lane].occupiedPositions && 
+          lanes[finalPositions.lane].occupiedPositions.has(finalPositions.column + 1)) return;
+      if (!stepStartTimestamp) startMoving = true;
+    }
+    
+    // Queue move immediately
+    moves.push(direction);
+    
+    // Start animation immediately if not already moving
+    if (!stepStartTimestamp && moves.length === 1) {
+      startMoving = true;
+    }
+  }
+  
+  // Keyboard controls (WASD - all enabled)
+  let keysPressed = {};
+  const keyHandler = (event) => {
+    const key = event.key.toLowerCase();
+    if (keysPressed[key]) return;
+    keysPressed[key] = true;
+    
+    if (key === "w" || event.keyCode === 38) {
+      move("forward");
+    } else if (key === "s" || event.keyCode === 40) {
+      move("backward");
+    } else if (key === "a" || event.keyCode === 37) {
+      move("left");
+    } else if (key === "d" || event.keyCode === 39) {
+      move("right");
+    }
+  };
+  
+  // Use capture phase for immediate response
+  window.addEventListener("keydown", keyHandler, { capture: true });
+  
+  window.addEventListener("keyup", (event) => {
+    keysPressed[event.key.toLowerCase()] = false;
+  });
+  
+  // Touch/swipe controls (optimized for immediate response)
+  let touchStartX = 0, touchStartY = 0;
+  let touchStartTime = 0;
+  renderer.domElement.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    touchStartX = touch.clientX;
+    touchStartY = touch.clientY;
+    touchStartTime = Date.now();
+  }, { passive: false });
+  
+  renderer.domElement.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    if (!touchStartX || !touchStartY) return;
+    
+    const touch = e.changedTouches[0];
+    const touchEndX = touch.clientX;
+    const touchEndY = touch.clientY;
+    const dx = touchEndX - touchStartX;
+    const dy = touchEndY - touchStartY;
+    const minSwipe = 25; // Reduced threshold for faster response
+    
+    // Process swipe immediately
+    if (Math.abs(dx) > Math.abs(dy)) {
+      if (Math.abs(dx) > minSwipe) {
+        if (dx > 0) move("right");
+        else move("left");
+      }
+    } else {
+      if (Math.abs(dy) > minSwipe) {
+        if (dy < 0) move("forward");
+        else move("backward"); // Swipe down enabled
+      }
+    }
+    
+    touchStartX = 0;
+    touchStartY = 0;
+  }, { passive: false });
+  
+  // Death sequence function - video appears instantly (ONLY for Game 3)
+  function triggerDeathSequence() {
+    // Double-check we're still in Game 3 context
+    if (crossyGameContainer.style.display !== 'block') {
+      return; // Don't trigger if not in Game 3
+    }
+    
+    gameActive = false;
+    if (animationId) cancelAnimationFrame(animationId);
+    
+    // Show video instantly (no zoom animation)
+    if (deathVideoOverlay && deathVideo) {
+      deathVideoOverlay.style.display = 'flex';
+      deathVideoOverlay.style.opacity = '1';
+      deathVideoOverlay.style.transition = 'none';
+      
+      // Play video immediately with audio at 100% volume
+      deathVideo.currentTime = 0;
+      deathVideo.volume = 1.0; // 100% volume
+      deathVideo.muted = false; // Ensure audio is not muted
+      deathVideo.play().catch(() => {});
+      
+      // After 3 seconds, fade back and restart
+      setTimeout(() => {
+        if (deathVideo) {
+          deathVideo.pause();
+          deathVideo.currentTime = 0;
+        }
+        if (deathVideoOverlay) {
+          deathVideoOverlay.style.opacity = '0';
+          deathVideoOverlay.style.transition = 'opacity .3s ease';
+          setTimeout(() => {
+            if (deathVideoOverlay && crossyGameContainer.style.display === 'block') {
+              deathVideoOverlay.style.display = 'none';
+              // Restart game
+              lanes.forEach((lane) => scene.remove(lane.mesh));
+              initaliseValues();
+              // Reset camera
+              camera.position.z = camera.position.z;
+              camera.position.x = initialCameraPositionX;
+              camera.position.y = initialCameraPositionY;
+              // Restart animation
+              previousTimestamp = null;
+              animationId = requestAnimationFrame(animate);
+            }
+          }, 300);
+        }
+      }, 3000);
+    }
+  }
+  
+  // Three.js Animation Loop (optimized for 60fps)
+  function animate(timestamp) {
+    if (!gameActive) return;
+    animationId = requestAnimationFrame(animate);
+    
+    if (!previousTimestamp) previousTimestamp = timestamp;
+    const delta = timestamp - previousTimestamp;
+    previousTimestamp = timestamp;
+    
+    // Animate vehicles moving on lanes
+    lanes.forEach((lane) => {
+      if (lane.type === "car" || lane.type === "truck") {
+        const aBitBeforeTheBeginingOfLane = (-boardWidth * zoom) / 2 - positionWidth * 2 * zoom;
+        const aBitAfterTheEndOFLane = (boardWidth * zoom) / 2 + positionWidth * 2 * zoom;
+        lane.vechicles.forEach((vechicle) => {
+          if (lane.direction) {
+            vechicle.position.x = vechicle.position.x < aBitBeforeTheBeginingOfLane
+              ? aBitAfterTheEndOFLane
+              : (vechicle.position.x -= (lane.speed / 16) * delta);
+          } else {
+            vechicle.position.x = vechicle.position.x > aBitAfterTheEndOFLane
+              ? aBitBeforeTheBeginingOfLane
+              : (vechicle.position.x += (lane.speed / 16) * delta);
+          }
+        });
+      }
+    });
+    
+    if (startMoving) {
+      stepStartTimestamp = timestamp;
+      startMoving = false;
+    }
+    
+    if (stepStartTimestamp) {
+      const moveDeltaTime = timestamp - stepStartTimestamp;
+      const moveDeltaDistance = Math.min(moveDeltaTime / stepTime, 1) * positionWidth * zoom;
+      const jumpDeltaDistance = Math.sin(Math.min(moveDeltaTime / stepTime, 1) * Math.PI) * 8 * zoom;
+      
+      switch (moves[0]) {
+        case "forward": {
+          const positionY = currentLane * positionWidth * zoom + moveDeltaDistance;
+          camera.position.y = initialCameraPositionY + positionY;
+          dirLight.position.y = initialDirLightPositionY + positionY;
+          chicken.position.y = positionY;
+          chicken.position.z = jumpDeltaDistance;
+          break;
+        }
+        case "backward": {
+          const positionY = currentLane * positionWidth * zoom - moveDeltaDistance;
+          camera.position.y = initialCameraPositionY + positionY;
+          dirLight.position.y = initialDirLightPositionY + positionY;
+          chicken.position.y = positionY;
+          chicken.position.z = jumpDeltaDistance;
+          break;
+        }
+        case "left": {
+          const positionX = (currentColumn * positionWidth + positionWidth / 2) * zoom - (boardWidth * zoom) / 2 - moveDeltaDistance;
+          camera.position.x = initialCameraPositionX + positionX;
+          dirLight.position.x = initialDirLightPositionX + positionX;
+          chicken.position.x = positionX;
+          chicken.position.z = jumpDeltaDistance;
+          break;
+        }
+        case "right": {
+          const positionX = (currentColumn * positionWidth + positionWidth / 2) * zoom - (boardWidth * zoom) / 2 + moveDeltaDistance;
+          camera.position.x = initialCameraPositionX + positionX;
+          dirLight.position.x = initialDirLightPositionX + positionX;
+          chicken.position.x = positionX;
+          chicken.position.z = jumpDeltaDistance;
+          break;
+        }
+      }
+      
+      // Once a step has ended
+      if (moveDeltaTime > stepTime) {
+        switch (moves[0]) {
+          case "forward": {
+            currentLane++;
+            crossyGameScore.textContent = currentLane;
+            // Check win condition (67 steps)
+            if (currentLane >= 67) {
+              gameActive = false;
+              if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+              }
+              
+              // Hide game container immediately so Saiki speech can show
+              crossyGameContainer.style.display = 'none';
+              backButton.style.display = 'none';
+              
+              // Mark game completed and show Saiki speech
+              markGameCompleted('game3');
+              shouldRedirectToMenu = true;
+              
+              // Small delay to ensure game is fully hidden before showing speech
+              setTimeout(() => {
+                showSaikiSpeech("Congratulations.", 2500, ()=>{}, 1000, true, false, true, false, true); // centerMode = true
+              }, 100);
+              return;
+            }
+            break;
+          }
+          case "backward": {
+            currentLane--;
+            crossyGameScore.textContent = currentLane;
+            break;
+          }
+          case "left": {
+            currentColumn--;
+            break;
+          }
+          case "right": {
+            currentColumn++;
+            break;
+          }
+        }
+        moves.shift();
+        stepStartTimestamp = moves.length === 0 ? null : timestamp;
+      }
+    }
+    
+    // Hit test (improved collision detection)
+    if (gameActive && lanes[currentLane] && (lanes[currentLane].type === "car" || lanes[currentLane].type === "truck")) {
+      const chickenMinX = chicken.position.x - (chickenSize * zoom) / 2;
+      const chickenMaxX = chicken.position.x + (chickenSize * zoom) / 2;
+      const vechicleLength = { car: 60, truck: 105 }[lanes[currentLane].type];
+      lanes[currentLane].vechicles.forEach((vechicle) => {
+        const carMinX = vechicle.position.x - (vechicleLength * zoom) / 2;
+        const carMaxX = vechicle.position.x + (vechicleLength * zoom) / 2;
+        // Check for collision overlap
+        if (chickenMaxX > carMinX && chickenMinX < carMaxX) {
+          triggerDeathSequence();
+        }
+      });
+    }
+    
+    renderer.render(scene, camera);
+  }
+  
+  // Start animation loop
+  animationId = requestAnimationFrame(animate);
+}
+
+const game3Handler = () => {
+  if(!gamesEnabled) return;
+  const game3El = document.getElementById('game3');
+  if(game3El.classList.contains('completed')) return;
+  
+  boxContainer.style.opacity = '0';
+  boxContainer.style.transform = 'scale(0.98)';
+  setTimeout(() => {
+    boxContainer.style.display = 'none';
+    
+    // Play mariogame3 audio
+    mariogame3Audio.loop = true;
+    mariogame3Audio.currentTime = 0;
+    mariogame3Audio.volume = 0.9;
+    mariogame3Audio.play().catch(()=>{});
+    
+    // Show Saiki speech FIRST (centered, no game visible yet)
+    showSaikiSpeech("You will be playing crossy road.. Get 67 points to complete the game and dont ask me why thats the value.", 8000, ()=>{
+      // Audio continues until user dismisses
+    }, 1000, true, false, true, false, true); // Skip default audio, game3Mode = true, centerMode = true
+    
+    // Store callback to start game AFTER speech is dismissed
+    window._game3StartCallback = () => {
+      mariogame3Audio.pause();
+      mariogame3Audio.loop = false;
+      
+      // NOW start the game after speech is dismissed
+      crossyGameContainer.style.display = 'block';
+      startCrossyRoad();
+      requestAnimationFrame(() => {
+        crossyGameContainer.classList.add('show');
+        backButton.style.display = 'block';
+        backButton.classList.add('show');
+      });
+      
+      window._game3StartCallback = null;
+    };
+  }, 350);
+};
+
+document.getElementById('game3').addEventListener('click', game3Handler);
+document.getElementById('game3').addEventListener('touchend', (e) => {
+  e.preventDefault();
+  game3Handler();
+}, { passive: false });
+/* --------------------------
+   Snake Game (Game 4) - Purple Liquid Glass Theme
+   -------------------------- */
+function startSnakeGame() {
+  // Ensure death video overlay is hidden (Game 3 only)
+  if (deathVideoOverlay) {
+    deathVideoOverlay.style.display = 'none';
+    deathVideoOverlay.style.opacity = '0';
+    if (deathVideo) {
+      deathVideo.pause();
+      deathVideo.currentTime = 0;
+    }
+  }
+  
+  snakeGameContainer.style.display = 'block';
+  snakeGameContainer.setAttribute('aria-hidden','false');
+  snakeGameScore.style.display = 'block'; // Show scoreboard in top-right
+  backButton.style.display = 'block';
+  boxContainer.style.display = 'none';
+  
+  const canvas = snakeGameCanvas;
+  const ctx = canvas.getContext('2d');
+  const container = snakeGameContainer;
+  
+  // Function to resize canvas and recalculate grid
+  function resizeCanvas() {
+    if (snakeGameContainer.style.display !== 'block') return;
+    const containerWidth = container.clientWidth;
+    const containerHeight = container.clientHeight;
+    
+    // Account for device pixel ratio for crisp rendering
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = containerWidth * dpr;
+    canvas.height = containerHeight * dpr;
+    canvas.style.width = containerWidth + 'px';
+    canvas.style.height = containerHeight + 'px';
+    ctx.scale(dpr, dpr);
+    
+    // Recalculate grid size
+    const newGridSize = Math.min(
+      Math.floor(containerWidth / 15),
+      Math.floor(containerHeight / 15)
+    );
+    
+    // Recalculate offsets
+    const newOffsetX = (containerWidth - (newGridSize * 15)) / 2;
+    const newOffsetY = (containerHeight - (newGridSize * 15)) / 2;
+    
+    return { gridSize: newGridSize, offsetX: newOffsetX, offsetY: newOffsetY };
+  }
+  
+  // Initial canvas setup
+  const initialSize = resizeCanvas();
+  let gridSize = initialSize.gridSize;
+  let offsetX = initialSize.offsetX;
+  let offsetY = initialSize.offsetY;
+  
+  const tileCount = {
+    x: 15, // Fixed 15 blocks wide
+    y: 15  // Fixed 15 blocks high
+  };
+  
+  // Handle window resize and orientation change for Game 4
+  let resizeTimeout;
+  function handleSnakeResize() {
+    if (snakeGameContainer.style.display !== 'block') return;
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      const newSize = resizeCanvas();
+      gridSize = newSize.gridSize;
+      offsetX = newSize.offsetX;
+      offsetY = newSize.offsetY;
+    }, 100); // Debounce resize
+  }
+  window.addEventListener('resize', handleSnakeResize);
+  window.addEventListener('orientationchange', () => {
+    setTimeout(handleSnakeResize, 200); // Longer delay for orientation change
+  });
+  
+  // Game state
+  let snake = [{ x: 7, y: 7 }]; // Start in center of 15x15 grid
+  let food = { x: 10, y: 10 };
+  let dx = 0;
+  let dy = 0;
+  let score = 0;
+  let gameLoop;
+  let gameActive = true;
+  let particles = []; // Particle effects array
+  
+  // Draw functions
+  function drawGrid() {
+    // Draw checkerboard grid pattern (15x15, centered)
+    // Use current gridSize and offsets (updated by resize handler)
+    for (let x = 0; x < tileCount.x; x++) {
+      for (let y = 0; y < tileCount.y; y++) {
+        const isEven = (x + y) % 2 === 0;
+        ctx.fillStyle = isEven ? '#0a0a0a' : '#000000';
+        ctx.fillRect(offsetX + x * gridSize, offsetY + y * gridSize, gridSize, gridSize);
+      }
+    }
+  }
+  
+  function drawSnake() {
+    snake.forEach((segment, index) => {
+      const x = offsetX + segment.x * gridSize;
+      const y = offsetY + segment.y * gridSize;
+      // Main body - neon purple (no glow to prevent rendering glitches)
+      ctx.fillStyle = index === 0 ? '#a855f7' : '#9333ea'; // Head is brighter
+      const padding = Math.max(1, gridSize * 0.05); // 5% padding
+      ctx.fillRect(x + padding, y + padding, gridSize - padding * 2, gridSize - padding * 2);
+      
+      // Face on head - only two dots for eyes (no mouth)
+      if (index === 0) {
+        const eyeSize = Math.max(2, gridSize * 0.12);
+        const eyeOffset = gridSize * 0.25;
+        // Eyes only (two simple dots)
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(x + eyeOffset, y + gridSize * 0.35, eyeSize / 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(x + gridSize - eyeOffset, y + gridSize * 0.35, eyeSize / 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    });
+  }
+  
+  function drawFood() {
+    // RED NEON cube (as requested)
+    const x = offsetX + food.x * gridSize;
+    const y = offsetY + food.y * gridSize;
+    
+    // Neon red glow effect
+    ctx.shadowBlur = 20;
+    ctx.shadowColor = 'rgba(255, 0, 0, 0.8)';
+    ctx.fillStyle = '#ff0000';
+    const padding = Math.max(1, gridSize * 0.1);
+    ctx.fillRect(x + padding, y + padding, gridSize - padding * 2, gridSize - padding * 2);
+    ctx.shadowBlur = 0;
+    
+    // Inner highlight
+    ctx.fillStyle = '#ff4444';
+    ctx.fillRect(x + padding * 2, y + padding * 2, (gridSize - padding * 4) * 0.6, (gridSize - padding * 4) * 0.6);
+  }
+  
+  // Particle class for red neon particles
+  class Particle {
+    constructor(x, y) {
+      this.x = x;
+      this.y = y;
+      this.vx = (Math.random() - 0.5) * 6;
+      this.vy = (Math.random() - 0.5) * 6;
+      this.life = 1;
+      this.decay = 0.02 + Math.random() * 0.02;
+      this.size = 3 + Math.random() * 4;
+    }
+    
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+      this.vy += 0.1; // gravity
+      this.life -= this.decay;
+      this.size *= 0.95;
+    }
+    
+    draw() {
+      if (this.life <= 0) return;
+      ctx.globalAlpha = this.life;
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = 'rgba(255, 0, 0, 0.8)';
+      ctx.fillStyle = '#ff0000';
+      ctx.fillRect(this.x - this.size/2, this.y - this.size/2, this.size, this.size);
+      ctx.shadowBlur = 0;
+      ctx.globalAlpha = 1;
+    }
+  }
+  
+  function createParticleSplash(x, y) {
+    for (let i = 0; i < 20; i++) {
+      particles.push(new Particle(x, y));
+    }
+  }
+  
+  function updateParticles() {
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.update();
+      if (p.life <= 0 || p.size <= 0) {
+        particles.splice(i, 1);
+      } else {
+        p.draw();
+      }
+    }
+  }
+  
+  function moveSnake() {
+    const head = { x: snake[0].x + dx, y: snake[0].y + dy };
+    
+    // Wrap around walls (Pacman style)
+    if (head.x < 0) {
+      head.x = tileCount.x - 1;
+    } else if (head.x >= tileCount.x) {
+      head.x = 0;
+    }
+    if (head.y < 0) {
+      head.y = tileCount.y - 1;
+    } else if (head.y >= tileCount.y) {
+      head.y = 0;
+    }
+    
+    // Check self collision
+    if (snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+      gameOver();
+      return;
+    }
+    
+    snake.unshift(head);
+    
+    // Check food collision
+    if (head.x === food.x && head.y === food.y) {
+      // Create particle splash at food position
+      const foodX = offsetX + food.x * gridSize + gridSize / 2;
+      const foodY = offsetY + food.y * gridSize + gridSize / 2;
+      createParticleSplash(foodX, foodY);
+      
+      score++;
+      snakeGameScore.textContent = `Cherries: ${score}/19`;
+      
+      // Win condition
+      if (score >= 19) {
+        completeSnakeGame();
+        return;
+      }
+      
+      // Generate new food
+      do {
+        food = {
+          x: Math.floor(Math.random() * tileCount.x),
+          y: Math.floor(Math.random() * tileCount.y)
+        };
+      } while (snake.some(segment => segment.x === food.x && segment.y === food.y));
+    } else {
+      snake.pop();
+    }
+  }
+  
+  function gameOver() {
+    gameActive = false;
+    if (gameLoop) cancelAnimationFrame(gameLoop);
+    // Restart game instantly (no delay)
+    snake = [{ x: 7, y: 7 }]; // Center of 15x15 grid
+    food = { x: 10, y: 10 };
+    dx = 0;
+    dy = 0;
+    score = 0;
+    snakeGameScore.textContent = 'Cherries: 0/19';
+    gameActive = true;
+    lastUpdateTime = performance.now();
+    // Use requestAnimationFrame for 60 FPS
+    function gameLoopRAF() {
+      if (!gameActive) return;
+      gameUpdate();
+      gameLoop = requestAnimationFrame(gameLoopRAF);
+    }
+    gameLoop = requestAnimationFrame(gameLoopRAF);
+  }
+  
+  function completeSnakeGame() {
+    gameActive = false;
+    if (gameLoop) cancelAnimationFrame(gameLoop);
+    markGameCompleted('game4');
+    
+    // Show Saiki in center with "you.. did it.." - overlay on top of game
+    shouldRedirectToMenu = true;
+    showSaikiSpeech("you.. did it..", 3000, ()=>{
+    }, 1000, true, false, false, true, true); // game4Mode = true, centerMode = true
+  }
+  
+  let lastUpdateTime = performance.now();
+  const updateInterval = 100; // Update game logic every 100ms (10 FPS for logic)
+  
+  function gameUpdate() {
+    if (!gameActive) return;
+    
+    const currentTime = performance.now();
+    const deltaTime = currentTime - lastUpdateTime;
+    
+    // Update game logic at ~10 FPS (every 100ms) for proper game speed
+    if (deltaTime >= updateInterval) {
+      moveSnake();
+      lastUpdateTime = currentTime;
+    }
+    
+    // Render at 60 FPS for smooth visuals
+    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas to prevent glitches
+    drawGrid();
+    drawFood();
+    drawSnake();
+    updateParticles(); // Update and draw particles
+  }
+  
+  // Controls
+  let keysPressed = {};
+  const handleKeyDown = (e) => {
+    if (!gameActive) return;
+    const key = e.key.toLowerCase();
+    if (keysPressed[key]) return;
+    keysPressed[key] = true;
+    
+    if ((key === 'arrowup' || key === 'w') && dy !== 1) {
+      dx = 0; dy = -1;
+    } else if ((key === 'arrowdown' || key === 's') && dy !== -1) {
+      dx = 0; dy = 1;
+    } else if ((key === 'arrowleft' || key === 'a') && dx !== 1) {
+      dx = -1; dy = 0;
+    } else if ((key === 'arrowright' || key === 'd') && dx !== -1) {
+      dx = 1; dy = 0;
+    }
+  };
+  
+  const handleKeyUp = (e) => {
+    keysPressed[e.key.toLowerCase()] = false;
+  };
+  
+  window.addEventListener('keydown', handleKeyDown);
+  window.addEventListener('keyup', handleKeyUp);
+  
+  // Touch/swipe controls
+  let touchStartX = 0, touchStartY = 0;
+  canvas.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  }, { passive: false });
+  
+  canvas.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    if (!touchStartX || !touchStartY || !gameActive) return;
+    
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
+    const dx_touch = touchEndX - touchStartX;
+    const dy_touch = touchEndY - touchStartY;
+    const minSwipe = 30;
+    
+    if (Math.abs(dx_touch) > Math.abs(dy_touch)) {
+      if (Math.abs(dx_touch) > minSwipe) {
+        if (dx_touch > 0 && dx !== -1) { dx = 1; dy = 0; }
+        else if (dx_touch < 0 && dx !== 1) { dx = -1; dy = 0; }
+      }
+    } else {
+      if (Math.abs(dy_touch) > minSwipe) {
+        if (dy_touch < 0 && dy !== 1) { dx = 0; dy = -1; }
+        else if (dy_touch > 0 && dy !== -1) { dx = 0; dy = 1; }
+      }
+    }
+    
+    touchStartX = 0;
+    touchStartY = 0;
+  }, { passive: false });
+  
+  // Cleanup function
+  window._snakeGameCleanup = () => {
+    if (gameLoop) cancelAnimationFrame(gameLoop);
+    window.removeEventListener('keydown', handleKeyDown);
+    window.removeEventListener('keyup', handleKeyUp);
+    gameActive = false;
+  };
+  
+  // Start game with optimized 60 FPS loop
+  function startGameLoop() {
+    lastUpdateTime = performance.now();
+    function gameLoopRAF() {
+      if (!gameActive) return;
+      gameUpdate();
+      gameLoop = requestAnimationFrame(gameLoopRAF);
+    }
+    gameLoop = requestAnimationFrame(gameLoopRAF);
+  }
+  startGameLoop();
+}
+
+const game4Handler = () => {
+  if(!gamesEnabled) return;
+  const game4El = document.getElementById('game4');
+  if(game4El.classList.contains('completed')) return;
+  // Cleanup previous game if exists
+  if(window._snakeGameCleanup) window._snakeGameCleanup();
+  
+  boxContainer.style.opacity = '0';
+  boxContainer.style.transform = 'scale(0.98)';
+  setTimeout(() => {
+    boxContainer.style.display = 'none';
+    snakeGameContainer.style.display = 'block';
+    backButton.style.display = 'block';
+    startSnakeGame();
+    requestAnimationFrame(() => {
+      snakeGameContainer.classList.add('show');
+      backButton.classList.add('show');
+    });
+  }, 350);
+};
+
+document.getElementById('game4').addEventListener('click', game4Handler);
+document.getElementById('game4').addEventListener('touchend', (e) => {
+  e.preventDefault();
+  game4Handler();
+}, { passive: false });
+
+/* --------------------------
+   Completed tick function
+   -------------------------- */
+function markGameCompleted(gameId){
+  const el = document.getElementById(gameId);
+  if(!el) return;
+  if(!el.classList.contains('completed')){
+    el.classList.add('completed');
+    // The CSS handles the grayed out appearance (40% opacity) and green tick
+    // Game box is now disabled and not clickable
+  }
+  
+  // Check if all 4 games are completed
+  const allCompleted = ['game1', 'game2', 'game3', 'game4'].every(id => {
+    const gameEl = document.getElementById(id);
+    return gameEl && gameEl.classList.contains('completed');
+  });
+  
+  if (allCompleted) {
+    // Trigger celebration sequence after 3 seconds (changed from 500ms)
+    setTimeout(() => {
+      startCelebrationSequence();
+    }, 3000);
+  }
+}
+
+/* --------------------------
+   Celebration Sequence (All Games Completed)
+   -------------------------- */
+const celebrationOverlay = document.getElementById('celebrationOverlay');
+const fireworksContainer = document.getElementById('fireworksContainer');
+const fireworksVideo = document.getElementById('fireworksVideo');
+const celebrationText = document.getElementById('celebrationText');
+const typewriterText = document.getElementById('typewriterText');
+const cherryAudio = document.getElementById('cherryAudio');
+const champagnecoastAudio = document.getElementById('champagnecoastAudio');
+
+function startCelebrationSequence() {
+  // Hide all game containers and show main menu
+  quizContainer.style.display = 'none';
+  puzzleContainer.style.display = 'none';
+  crossyGameContainer.style.display = 'none';
+  snakeGameContainer.style.display = 'none';
+  snakeGameScore.style.display = 'none';
+  backButton.style.display = 'none';
+  dimOverlay.style.display = 'none';
+  psycheOverlay.classList.remove('show');
+  
+  // Show main menu with all games completed
+  boxContainer.style.display = 'grid';
+  boxContainer.style.opacity = 1;
+  mainScreen.classList.add('visible');
+  
+  // Wait 2 seconds, then fade to black
+  setTimeout(() => {
+    // Hide main menu
+    boxContainer.style.display = 'none';
+    mainScreen.classList.remove('visible');
+    
+    // Create black screen overlay and fade in smoothly
+    celebrationOverlay.style.display = 'block';
+    celebrationOverlay.style.background = '#000';
+    celebrationOverlay.style.opacity = '0';
+    celebrationOverlay.style.transition = 'opacity 1s ease';
+    
+    setTimeout(() => {
+      celebrationOverlay.style.opacity = '1';
+      
+      // When screen is black, play cherry.mp3 audio
+      cherryAudio.currentTime = 0;
+      cherryAudio.volume = 0.9;
+      cherryAudio.loop = true;
+      cherryAudio.play().catch(() => {});
+      
+      // Start fireworks video immediately after audio starts - optimized for highest quality
+      fireworksVideo.currentTime = 0;
+      fireworksVideo.loop = false; // Don't loop
+      fireworksVideo.muted = false;
+      fireworksVideo.volume = 1.0; // Full volume
+      fireworksVideo.playsInline = true;
+      fireworksVideo.playbackRate = 1.0; // Normal speed, don't slow down
+      // Remove any filters/blur for highest quality
+      fireworksVideo.style.filter = 'none';
+      fireworksVideo.style.webkitFilter = 'none';
+      // Ensure smooth playback
+      fireworksVideo.style.willChange = 'auto';
+      fireworksVideo.play().catch(() => {});
+      
+      // After 3 seconds of video playing, start typewriter (no blur - video stays clear)
+      setTimeout(() => {
+        celebrationText.style.display = 'flex';
+        celebrationText.style.alignItems = 'center';
+        celebrationText.style.justifyContent = 'center';
+        startTypewriterSequence();
+      }, 3000); // Start typewriter after 3 seconds - video remains clear
+    }, 1000); // Wait for fade to complete
+  }, 2000); // Wait 2 seconds before starting
+}
+
+// Fireworks function removed - using video instead
+
+function startTypewriterSequence() {
+  const messages = [
+    "WELL DONE RUFIA",
+    "I actually did not think you would make it this far",
+    "Oh well.",
+    "since i literally never lie to you",
+    "here is your 5000 word essay"
+  ];
+  
+  let messageIndex = 0;
+  let charIndex = 0;
+  
+  function typeNextChar() {
+    if (messageIndex >= messages.length) {
+      // All messages done, wait 4 seconds then fade to black and transition
+      setTimeout(() => {
+        // Fade to black
+        celebrationOverlay.style.transition = 'opacity 1s ease';
+        celebrationOverlay.style.opacity = '0';
+        
+        setTimeout(() => {
+          // Hide main menu IMMEDIATELY before transition
+          boxContainer.style.display = 'none';
+          mainScreen.classList.remove('visible');
+          skipButton.style.display = 'none';
+          
+          // Start essay fakeout
+          startEssayFakeout();
+        }, 1000); // Wait for fade to complete
+      }, 4000);
+      return;
+    }
+    
+    const message = messages[messageIndex];
+    
+    if (charIndex < message.length) {
+      // Clear previous text and type new message (not stacked)
+      typewriterText.textContent = message.substring(0, charIndex + 1);
+      charIndex++;
+      setTimeout(typeNextChar, 60); // Slightly slower typing
+    } else {
+      // Check if this is the last message ("here is your 5000 word essay")
+      if (messageIndex === messages.length - 1) {
+        // Immediately fade to black and transition to essay screen
+        setTimeout(() => {
+          // Fade to black quickly
+          celebrationOverlay.style.transition = 'opacity 0.8s ease';
+          celebrationOverlay.style.opacity = '0';
+          
+          setTimeout(() => {
+            // Hide main menu IMMEDIATELY before transition
+            boxContainer.style.display = 'none';
+            mainScreen.classList.remove('visible');
+            skipButton.style.display = 'none';
+            
+            // Start essay fakeout with audio fade in
+            startEssayFakeout();
+          }, 800); // Wait for fade to complete
+        }, 500); // Short delay after message finishes (0.5 seconds)
+        return;
+      }
+      
+      // Move to next message - clear and wait before starting
+      messageIndex++;
+      charIndex = 0;
+      setTimeout(() => {
+        typewriterText.textContent = ''; // Clear before next message
+        setTimeout(typeNextChar, 300); // Short delay before starting
+      }, 1500); // Wait 1.5s before clearing
+    }
+  }
+  
+  // Start with a short delay
+  setTimeout(() => {
+    typewriterText.textContent = '';
+    typeNextChar();
+  }, 500);
+}
+
+function startEssayFakeout() {
+  // Hide celebration overlay and ALL UI elements
+  celebrationOverlay.style.display = 'none';
+  
+  // Hide main menu and all game elements
+  boxContainer.style.display = 'none';
+  mainScreen.classList.remove('visible');
+  skipButton.style.display = 'none';
+  backButton.style.display = 'none';
+  quizContainer.style.display = 'none';
+  puzzleContainer.style.display = 'none';
+  crossyGameContainer.style.display = 'none';
+  snakeGameContainer.style.display = 'none';
+  snakeGameScore.style.display = 'none';
+  dimOverlay.style.display = 'none';
+  psycheOverlay.classList.remove('show');
+  
+  // Show essay fakeout page (full screen, covers everything)
+  const essayPage = document.getElementById('essayFakeoutPage');
+  const essayText = document.getElementById('essayText');
+  const wordCountBox = document.getElementById('wordCountBox');
+  
+  essayPage.style.display = 'block';
+  essayPage.style.opacity = '0';
+  essayPage.style.transition = 'opacity 0.8s ease';
+  
+  // Fade in essay page
+  setTimeout(() => {
+    essayPage.style.opacity = '1';
+    
+    // Fade in cherry audio (if not already playing or if volume is low)
+    if (cherryAudio) {
+      if (cherryAudio.paused || cherryAudio.volume < 0.5) {
+        cherryAudio.currentTime = 0;
+        cherryAudio.volume = 0;
+        cherryAudio.play().catch(() => {});
+        fadeIn(cherryAudio, 0.9, 1000);
+      }
+    }
+  }, 50);
+  
+  // Generate 500 words of fake essay text
+  const words = [
+    "In", "the", "vast", "expanse", "of", "human", "experience", "there", "exists", "a", "phenomenon",
+    "so", "profound", "intricate", "that", "it", "defies", "simple", "explanation", "This", "phenomenon",
+    "which", "we", "shall", "explore", "in", "great", "detail", "represents", "the", "culmination",
+    "of", "countless", "variables", "each", "contributing", "to", "a", "greater", "whole", "The",
+    "complexity", "inherent", "in", "such", "systems", "cannot", "be", "overstated", "for", "they",
+    "represent", "the", "very", "essence", "of", "interconnectedness", "that", "defines", "our",
+    "existence", "As", "we", "delve", "deeper", "into", "this", "subject", "we", "must",
+    "acknowledge", "the", "multifaceted", "nature", "of", "reality", "itself", "where", "every",
+    "action", "every", "thought", "every", "moment", "contributes", "to", "an", "ever-evolving",
+    "tapestry", "of", "experience", "The", "implications", "of", "such", "understanding", "reach",
+    "far", "beyond", "the", "immediate", "extending", "into", "realms", "of", "philosophy", "science",
+    "and", "human", "consciousness", "It", "is", "within", "this", "framework", "that", "we",
+    "begin", "to", "comprehend", "the", "true", "nature", "of", "our", "journey", "a", "journey",
+    "marked", "by", "discovery", "understanding", "and", "ultimately", "transformation", "The", "path",
+    "forward", "though", "uncertain", "is", "illuminated", "by", "the", "knowledge", "we", "have",
+    "gained", "the", "connections", "we", "have", "made", "and", "the", "insights", "we", "have",
+    "discovered", "along", "the", "way", "This", "journey", "in", "its", "entirety", "represents",
+    "not", "just", "a", "collection", "of", "moments", "but", "a", "continuous", "process", "of",
+    "becoming", "of", "evolving", "of", "transcending", "the", "limitations", "that", "once",
+    "defined", "us", "And", "so", "as", "we", "stand", "at", "this", "juncture", "we", "recognize",
+    "that", "the", "true", "value", "lies", "not", "in", "the", "destination", "but", "in", "the",
+    "journey", "itself", "in", "the", "experiences", "that", "shape", "us", "and", "in", "the",
+    "understanding", "that", "emerges", "from", "our", "collective", "exploration", "of", "the",
+    "unknown", "The", "future", "bright", "and", "full", "of", "possibility", "awaits", "those",
+    "who", "dare", "to", "venture", "forth", "to", "question", "to", "explore", "and", "to",
+    "discover", "the", "truths", "that", "lie", "just", "beyond", "the", "horizon", "of", "our",
+    "current", "understanding", "This", "in", "essence", "is", "the", "nature", "of", "our", "quest",
+    "a", "quest", "that", "continues", "to", "unfold", "with", "each", "passing", "moment", "each",
+    "new", "discovery", "and", "each", "step", "forward", "into", "the", "vast", "unknown", "that",
+    "stretches", "before", "us", "The", "journey", "is", "far", "from", "over", "and", "the",
+    "possibilities", "are", "endless", "limited", "only", "by", "our", "imagination", "our", "courage",
+    "and", "our", "willingness", "to", "embrace", "the", "challenges", "that", "lie", "ahead"
+  ];
+  
+  // Generate fake essay text (just for visual effect, not the actual content)
+  const fakeEssayText = "Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ".repeat(50);
+  
+  let wordCount = 0;
+  let charIndex = 0;
+  const targetWords = 500;
+  const totalDuration = 5000; // 5 seconds in milliseconds
+  const startTime = performance.now();
+  
+  function typeEssay() {
+    const elapsed = performance.now() - startTime;
+    const progress = Math.min(elapsed / totalDuration, 1); // 0 to 1
+    
+    if (progress < 1) {
+      // Calculate target word count based on progress (should reach 500 at 100%)
+      const targetWordCount = Math.floor(progress * targetWords);
+      
+      // Type characters until we reach the target word count
+      while (wordCount < targetWordCount && charIndex < fakeEssayText.length) {
+        charIndex += 3; // Increment character index
+        const currentText = fakeEssayText.substring(0, charIndex);
+        essayText.textContent = currentText;
+        
+        // Count words
+        wordCount = currentText.trim().split(/\s+/).length;
+        if (wordCount > targetWords) wordCount = targetWords;
+      }
+      
+      // Update word count box
+      wordCountBox.textContent = `${wordCount}/5000`;
+      
+      // Continue typing - use requestAnimationFrame for smooth updates
+      requestAnimationFrame(typeEssay);
+    } else {
+      // Ensure final count is exactly 500 (force it if needed)
+      if (wordCount < 500) {
+        // Add more characters to reach 500 words
+        while (wordCount < 500 && charIndex < fakeEssayText.length) {
+          charIndex += 3;
+          const currentText = fakeEssayText.substring(0, charIndex);
+          essayText.textContent = currentText;
+          wordCount = currentText.trim().split(/\s+/).length;
+          if (wordCount > targetWords) wordCount = targetWords;
+        }
+      }
+      // Force to 500 if still not reached
+      wordCount = 500;
+      wordCountBox.textContent = '500/5000';
+      
+      // Trigger glitch effect at 500 words
+      wordCountBox.classList.add('glitch');
+      setTimeout(() => {
+        wordCountBox.classList.remove('glitch');
+        wordCountBox.textContent = '500/500';
+        setTimeout(() => {
+          essayText.textContent = '';
+          wordCountBox.textContent = 'oh no it glitched out what a shame.';
+          wordCountBox.style.fontSize = '18px';
+          
+          // Fade out cherry.mp3 audio
+          if (cherryAudio && !cherryAudio.paused) {
+            fadeOut(cherryAudio, 800);
+            setTimeout(() => {
+              cherryAudio.pause();
+              cherryAudio.currentTime = 0;
+            }, 800);
+          }
+          
+          // Show button after message is displayed
+          const finalPageButton = document.getElementById('finalPageButton');
+          finalPageButton.style.display = 'block';
+          finalPageButton.style.filter = 'none !important';
+        }, 1000);
+      }, 1000);
+    }
+  }
+  
+  // Start typing immediately
+  typeEssay();
+}
+
+/* --------------------------
+   Extra: ensure start screen shows orange initially
+   -------------------------- */
+(function init(){
+  // ensure start state
+  body.classList.add('startOrange');
+  body.classList.remove('purpleBg');
+  mainScreen.classList.remove('visible');
+  // hide menu boxes at start (user wanted blank orange screen)
+  boxContainer.style.display = 'none'; // keep boxes hidden until start
+  // Hide back button on start page and main menu
+  backButton.style.display = 'none';
+  // Hide Game 4 container and scoreboard on page load
+  snakeGameContainer.style.display = 'none';
+  snakeGameScore.style.display = 'none';
+  // Hide celebration overlay
+  celebrationOverlay.style.display = 'none';
+  // Hide essay fakeout page
+  document.getElementById('essayFakeoutPage').style.display = 'none';
+  // Hide final page button
+  document.getElementById('finalPageButton').style.display = 'none';
+  // Hide final page
+  document.getElementById('finalPage').style.display = 'none';
+  
+  // Initialize fluid shape containers (hidden - using gradient backgrounds now)
+  const startFluids = document.getElementById('fluidShapesContainer');
+  const redPurpleFluids = document.getElementById('redPurpleFluidsContainer');
+  const redGlowFluids = document.getElementById('redGlowFluidsContainer');
+  if(startFluids) startFluids.style.display = 'none'; // Hide - using gradient
+  if(redPurpleFluids) redPurpleFluids.style.display = 'none'; // Hide - using gradient
+  if(redGlowFluids) redGlowFluids.style.display = 'none'; // Hide final page fluids
+  
+  // Typewriter effect for final page text - entire text in under 3 seconds
+  function typewriterEffectAllText(duration = 2800) {
+    const finalPageContent = document.getElementById('finalPageContent');
+    const paragraphs = finalPageContent.querySelectorAll('p');
+    
+    // Store original paragraph texts
+    const paragraphTexts = Array.from(paragraphs).map(p => p.textContent);
+    
+    // Clear all paragraphs
+    paragraphs.forEach(p => {
+      p.innerHTML = '';
+      p.style.opacity = '1';
+    });
+    
+    // Calculate total characters (including spaces between paragraphs)
+    const totalChars = paragraphTexts.reduce((sum, text) => sum + text.length, 0);
+    const delay = duration / totalChars;
+    
+    let charIndex = 0;
+    let paragraphIndex = 0;
+    let charInParagraph = 0;
+    
+    function typeChar() {
+      if (paragraphIndex < paragraphTexts.length) {
+        const currentText = paragraphTexts[paragraphIndex];
+        
+        if (charInParagraph < currentText.length) {
+          // Add character to current paragraph
+          const span = document.createElement('span');
+          span.className = 'typewriter-char';
+          span.textContent = currentText[charInParagraph];
+          paragraphs[paragraphIndex].appendChild(span);
+          
+          charInParagraph++;
+          charIndex++;
+          setTimeout(typeChar, delay);
+        } else {
+          // Move to next paragraph
+          paragraphIndex++;
+          charInParagraph = 0;
+          setTimeout(typeChar, delay);
+        }
+      } else {
+        // All text typed, mark paragraphs as visible
+        paragraphs.forEach(p => p.classList.add('visible'));
+      }
+    }
+    
+    typeChar();
+  }
+  
+  // Final page button click handler
+  const finalPageButton = document.getElementById('finalPageButton');
+  const finalPage = document.getElementById('finalPage');
+  
+  const finalPageButtonHandler = () => {
+    // Fade out cherry audio and stop it (if still playing)
+    if (cherryAudio && !cherryAudio.paused) {
+      fadeOut(cherryAudio, 800);
+      setTimeout(() => {
+        cherryAudio.pause();
+        cherryAudio.currentTime = 0;
+      }, 800);
+    }
+    
+    // Hide essay fakeout page with smooth transition
+    const essayPage = document.getElementById('essayFakeoutPage');
+    const wordCountBox = document.getElementById('wordCountBox');
+    const essayText = document.getElementById('essayText');
+    
+    // Fade out text elements smoothly
+    essayPage.style.transition = 'opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+    wordCountBox.style.transition = 'opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+    essayText.style.transition = 'opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+    essayPage.style.opacity = '0';
+    wordCountBox.style.opacity = '0';
+    essayText.style.opacity = '0';
+    
+    setTimeout(() => {
+      essayPage.style.display = 'none';
+      
+      // Hide red/purple fluid shapes (no longer needed - using video)
+      const redPurpleFluids = document.getElementById('redPurpleFluidsContainer');
+      const redGlowFluids = document.getElementById('redGlowFluidsContainer');
+      if(redPurpleFluids) redPurpleFluids.style.display = 'none';
+      if(redGlowFluids) redGlowFluids.style.display = 'none';
+      
+      // Show final page with smooth fade in
+      finalPage.style.display = 'block';
+      finalPage.style.opacity = '0';
+      finalPage.style.transition = 'opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+      requestAnimationFrame(() => {
+        finalPage.style.opacity = '1';
+      });
+      
+      // Start video background
+      const finalPageVideo = document.getElementById('finalPageVideo');
+      if (finalPageVideo) {
+        finalPageVideo.currentTime = 0;
+        finalPageVideo.loop = true;
+        finalPageVideo.muted = true;
+        finalPageVideo.play().catch(() => {});
+      }
+      
+      // Fade in champagnecoast audio at 50% volume
+      setTimeout(() => {
+        champagnecoastAudio.currentTime = 0;
+        champagnecoastAudio.volume = 0;
+        champagnecoastAudio.loop = true;
+        champagnecoastAudio.play().catch(() => {});
+        fadeIn(champagnecoastAudio, 0.5, 1000); // Fade to 50% volume
+      }, 500); // Start fading in after 500ms
+      
+      // Start typewriter effect for entire text (under 3 seconds total)
+      setTimeout(() => {
+        typewriterEffectAllText(2800); // Entire text in 2.8 seconds
+      }, 300);
+    }, 500); // Wait for fade out to complete
+  };
+  
+  finalPageButton.addEventListener('click', finalPageButtonHandler);
+  finalPageButton.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    finalPageButtonHandler();
+  }, { passive: false });
+  
+  // Skip button functionality (for testing)
+  skipButton.addEventListener('click', () => {
+    // Mark all games as completed
+    ['game1', 'game2', 'game3', 'game4'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && !el.classList.contains('completed')) {
+        el.classList.add('completed');
+      }
+    });
+    
+    // Hide all game containers
+    quizContainer.style.display = 'none';
+    puzzleContainer.style.display = 'none';
+    crossyGameContainer.style.display = 'none';
+    snakeGameContainer.style.display = 'none';
+    snakeGameScore.style.display = 'none';
+    backButton.style.display = 'none';
+    dimOverlay.style.display = 'none';
+    psycheOverlay.classList.remove('show');
+    
+    // Show main menu
+    boxContainer.style.display = 'grid';
+    boxContainer.style.opacity = 1;
+    mainScreen.classList.add('visible');
+    
+    // Ensure skip button is visible
+    skipButton.style.display = 'block';
+    
+    // Wait 2 seconds then trigger celebration (changed from 5 seconds)
+    setTimeout(() => {
+      startCelebrationSequence();
+    }, 2000);
+  });
+})();
+</script>
+</body>
+</html>
